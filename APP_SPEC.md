@@ -45,4 +45,4 @@ Out of scope:
 - Editing the source CSV (you edit the digest, not the input file).
 - Persistence/sharing of digests across devices (localStorage holds only the per-source column mapping).
 
-Production URL:
+Production URL: https://standupdigest.vercel.app
