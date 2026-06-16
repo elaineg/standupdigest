@@ -35,7 +35,21 @@ export interface ParseResult {
 
 // ---- Header alias map (case-insensitive) ----
 
-const TITLE_ALIASES = ["summary", "title", "name", "issue summary"];
+const TITLE_ALIASES = [
+  // Canonical per-tracker
+  "summary",        // Jira
+  "title",          // Linear, GitHub
+  "name",           // Asana (also "Task Name" below)
+  "issue summary",
+  // Broader synonyms for real-world exports (Dana: Asana "Task Name")
+  "task name",
+  "task",
+  "item",
+  "subject",
+  "story",
+  "ticket",
+  "card",
+];
 const STATUS_ALIASES = [
   "status",
   "state",
@@ -114,7 +128,10 @@ export function detectSource(
     return "asana";
   if (
     lower.includes("title") &&
-    (lower.includes("updated_at") || lower.includes("closed_at"))
+    (lower.includes("updated_at") ||
+      lower.includes("closed_at") ||
+      // GitHub Issues CSV without date columns: Title + State (no cycle = not Linear)
+      (lower.includes("state") && !lower.includes("cycle")))
   )
     return "github";
   return "unknown";
@@ -164,15 +181,63 @@ export function bucketStatus(status: string): Bucket {
   return "Unmapped";
 }
 
-function detectCarryOver(date: string): boolean {
+// GitHub-specific bucket logic:
+// - "closed" → Shipped (handled by standard SHIPPED_KEYWORDS already)
+// - "open"   → In Progress (NOT Backlog — GitHub "open" means active work)
+// - Labels column with blocked-type terms overrides to Blocked.
+// Returns the bucket for a GitHub row given the State value and optional Labels value.
+export function bucketStatusGitHub(state: string, labels?: string): Bucket {
+  const s = state.toLowerCase().trim();
+  // Blocked labels override everything (check first)
+  if (labels) {
+    const l = labels.toLowerCase();
+    if (BLOCKED_KEYWORDS.some((k) => l.includes(k))) return "Blocked";
+  }
+  // Shipped keywords (closed, resolved, merged, etc.)
+  if (SHIPPED_KEYWORDS.some((k) => matchesKeyword(s, k))) return "Shipped";
+  // In Progress keywords
+  if (IN_PROGRESS_KEYWORDS.some((k) => matchesKeyword(s, k))) return "In Progress";
+  // Blocked keywords on state itself
+  if (BLOCKED_KEYWORDS.some((k) => matchesKeyword(s, k))) return "Blocked";
+  // "open" → In Progress for GitHub (not Backlog)
+  if (s === "open") return "In Progress";
+  // Other Backlog keywords still apply (e.g. "triage", "new")
+  if (BACKLOG_KEYWORDS.some((k) => matchesKeyword(s, k))) return "Backlog";
+  return "Unmapped";
+}
+
+// Exported so unit tests can verify the logic directly.
+// referenceDate: the "as-of" date for the dataset (defaults to now for ad-hoc use).
+// No date string ⇒ not carry-over (P2 fix: baseless GitHub flag).
+export function detectCarryOver(date: string, referenceDate: Date): boolean {
   if (!date) return false;
   const d = new Date(date);
   if (isNaN(d.getTime())) return false;
-  const now = new Date();
   const diffDays =
-    (now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24);
-  // Flag as carry-over if last updated more than 7 days ago
+    (referenceDate.getTime() - d.getTime()) / (1000 * 60 * 60 * 24);
+  // Flag as carry-over if last updated more than 7 days before the reference date
   return diffDays > 7;
+}
+
+// Derive the dataset's own "as-of" date: the most-recent valid date among all rows.
+// This makes carry-over detection relative to when the CSV was exported, not today —
+// so sample data and old exports remain deterministic regardless of the current date.
+function computeReferenceDate(
+  rawData: Record<string, string>[],
+  dateColumn: string
+): Date {
+  if (!dateColumn) return new Date();
+  let maxMs = -Infinity;
+  for (const row of rawData) {
+    const raw = row[dateColumn];
+    if (!raw) continue;
+    const d = new Date(raw);
+    if (!isNaN(d.getTime()) && d.getTime() > maxMs) {
+      maxMs = d.getTime();
+    }
+  }
+  // If no valid dates found, fall back to now (behaves same as before for date-less CSVs)
+  return maxMs === -Infinity ? new Date() : new Date(maxMs);
 }
 
 export function parseCSVText(
@@ -197,6 +262,11 @@ export function parseCSVText(
     date: overrideMap?.date ?? autoMap.date,
   };
 
+  // Compute a single reference date from the dataset's own most-recent date.
+  // This is the ONE source of truth for carry-over detection — all rows, the
+  // prose summary, and both copy outputs will read isCarryOver from this pass.
+  const referenceDate = computeReferenceDate(result.data, columnMap.date);
+
   const rows: DigestRow[] = result.data.map((row, idx) => {
     const title = (columnMap.title ? row[columnMap.title] : "") ?? "";
     const status = (columnMap.status ? row[columnMap.status] : "") ?? "";
@@ -204,8 +274,14 @@ export function parseCSVText(
     const epic = (columnMap.epic ? row[columnMap.epic] : "") ?? "";
     const date = (columnMap.date ? row[columnMap.date] : "") ?? "";
 
-    const bucket = status ? bucketStatus(status) : "Unmapped";
-    const isCarryOver = detectCarryOver(date);
+    // GitHub: use GitHub-specific bucket logic (open→In Progress, labels→Blocked override)
+    const bucket = status
+      ? source === "github"
+        ? bucketStatusGitHub(status, epic)
+        : bucketStatus(status)
+      : "Unmapped";
+    // Single carry-over computation per row — shared by digest tags, prose, and copy.
+    const isCarryOver = detectCarryOver(date, referenceDate);
 
     return {
       id: `row-${idx}`,

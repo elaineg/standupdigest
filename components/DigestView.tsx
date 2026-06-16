@@ -2,12 +2,23 @@
 
 import { useState, useCallback } from "react";
 import type { DigestRow, Bucket, GroupMode } from "@/lib/csvParser";
+import { buildMarkdown, buildPlainText, type DigestModel } from "@/lib/digestSerializer";
+
+export interface WeekOption {
+  key: string; // "YYYY-Www" or "all"
+  label: string; // "Week of Mon 9 Jun – Sun 15 Jun" or "All dates"
+}
 
 interface DigestViewProps {
   rows: DigestRow[];
   groupMode: GroupMode;
+  weekFilter: string; // ISO week key "YYYY-Www" or "all"
+  availableWeeks: WeekOption[];
+  onWeekFilterChange: (week: string) => void;
   onBucketChange: (rowId: string, bucket: Bucket) => void;
   onTitleEdit: (rowId: string, title: string) => void;
+  onRemapClick: () => void;
+  suppressSuccess?: boolean; // Fix 1: suppress "All statuses recognized ✓" when core col unmapped
 }
 
 const BUCKET_MOVE_OPTIONS: Bucket[] = [
@@ -17,35 +28,148 @@ const BUCKET_MOVE_OPTIONS: Bucket[] = [
   "Backlog",
 ];
 
-function ProseSummary({ rows }: { rows: DigestRow[] }) {
-  const shipped = rows.filter((r) => r.bucket === "Shipped").length;
-  const inProgress = rows.filter((r) => r.bucket === "In Progress").length;
-  const blocked = rows.filter((r) => r.bucket === "Blocked").length;
-  const carryOver = rows.filter(
-    (r) => r.isCarryOver && r.bucket !== "Backlog" && r.bucket !== "Unmapped"
-  ).length;
+// ---- Week filter helpers (exported for DigestApp to use) ----
+
+export function getISOWeekKey(dateStr: string): string | null {
+  if (!dateStr) return null;
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return null;
+  const day = d.getUTCDay(); // 0=Sun, 1=Mon
+  const diff = day === 0 ? -6 : 1 - day; // days to Monday
+  const mon = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() + diff));
+  const year = mon.getUTCFullYear();
+  // ISO week number via Jan 4 rule
+  const jan4 = new Date(Date.UTC(year, 0, 4));
+  const weekNum = Math.ceil(
+    ((mon.getTime() - jan4.getTime()) / 86400000 + (jan4.getUTCDay() || 7) - 1) / 7 + 1
+  );
+  return `${year}-W${String(weekNum).padStart(2, "0")}`;
+}
+
+function formatWeekLabel(key: string): string {
+  if (key === "all") return "All dates";
+  const m = key.match(/^(\d{4})-W(\d{2})$/);
+  if (!m) return key;
+  const year = parseInt(m[1], 10);
+  const week = parseInt(m[2], 10);
+  const jan4 = new Date(Date.UTC(year, 0, 4));
+  const jan4Day = jan4.getUTCDay() || 7;
+  const monday = new Date(jan4.getTime() - (jan4Day - 1) * 86400000 + (week - 1) * 7 * 86400000);
+  const sunday = new Date(monday.getTime() + 6 * 86400000);
+  const fmt = (d: Date) =>
+    d.toLocaleDateString("en-GB", {
+      weekday: "short",
+      day: "numeric",
+      month: "short",
+      timeZone: "UTC",
+    });
+  return `Week of ${fmt(monday)} – ${fmt(sunday)}`;
+}
+
+export function computeWeekOptions(rows: DigestRow[]): WeekOption[] {
+  const seen = new Set<string>();
+  for (const r of rows) {
+    if (r.date) {
+      const k = getISOWeekKey(r.date);
+      if (k) seen.add(k);
+    }
+  }
+  const keys = Array.from(seen).sort().reverse(); // most recent first
+  const options: WeekOption[] = keys.map((k) => ({ key: k, label: formatWeekLabel(k) }));
+  options.push({ key: "all", label: "All dates" });
+  return options;
+}
+
+export function filterRowsByWeek(rows: DigestRow[], weekKey: string): DigestRow[] {
+  if (weekKey === "all") return rows;
+  return rows.filter((r) => {
+    // Still-open rows (In Progress / Blocked) are always kept: rows in the current week
+    // appear normally; rows from prior weeks are carry-over (isCarryOver is set at parse time).
+    // An undated open row is also kept — don't drop work with no usable date.
+    if (r.bucket === "In Progress" || r.bucket === "Blocked") return true;
+    // Shipped / Backlog / Unmapped: filter strictly to the selected week.
+    // Rows with no date are also kept (date unknown ≠ wrong week).
+    if (!r.date) return true;
+    return getISOWeekKey(r.date) === weekKey;
+  });
+}
+
+// ---- Editable prose summary (Fix 5) ----
+
+function EditableProseSummary({
+  autoText,
+  editedProse,
+  onProseEdit,
+}: {
+  autoText: string;
+  editedProse: string | null;
+  onProseEdit: (v: string) => void;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState("");
+
+  const displayText = editedProse ?? autoText;
+
+  const startEdit = () => {
+    setDraft(displayText);
+    setEditing(true);
+  };
+
+  const commitEdit = () => {
+    const trimmed = draft.trim();
+    onProseEdit(trimmed || displayText);
+    setEditing(false);
+  };
+
+  if (editing) {
+    return (
+      <div className="flex items-center gap-2" data-testid="prose-summary">
+        <input
+          autoFocus
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onBlur={commitEdit}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") commitEdit();
+            if (e.key === "Escape") setEditing(false);
+          }}
+          className="flex-1 rounded border border-blue-400 px-2 py-1 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          aria-label="Edit prose summary"
+        />
+        <button
+          onClick={commitEdit}
+          className="shrink-0 text-xs text-blue-600 hover:text-blue-800"
+        >
+          Save
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <p className="text-base text-gray-700" data-testid="prose-summary">
-      This week the team shipped{" "}
-      <strong>{shipped}</strong>{" "}
-      {shipped === 1 ? "item" : "items"}, has{" "}
-      <strong>{inProgress}</strong>{" "}
-      in progress and{" "}
-      <strong>{blocked}</strong>{" "}
-      blocked, with{" "}
-      <strong>{carryOver}</strong>{" "}
-      carried over.
-    </p>
+    <div className="flex items-start gap-2 group" data-testid="prose-summary">
+      <p className="flex-1 text-base text-gray-700">{displayText}</p>
+      <button
+        onClick={startEdit}
+        aria-label="Edit prose summary"
+        className="shrink-0 mt-0.5 text-xs text-gray-400 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 hover:text-blue-600 transition-opacity"
+      >
+        Edit
+      </button>
+    </div>
   );
 }
+
+// ---- Editable digest line ----
 
 function EditableLine({
   row,
   onEdit,
+  suppressAssignee = false,
 }: {
   row: DigestRow;
   onEdit: (id: string, title: string) => void;
+  suppressAssignee?: boolean;
 }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState("");
@@ -95,14 +219,14 @@ function EditableLine({
           </span>
         )}
         {displayTitle}
-        {row.assignee && (
+        {row.assignee && !suppressAssignee && (
           <span className="ml-2 text-xs text-gray-400">({row.assignee})</span>
         )}
       </span>
       <button
         onClick={startEdit}
         aria-label={`Edit line: ${displayTitle}`}
-        className="shrink-0 text-xs text-gray-400 opacity-0 group-hover:opacity-100 hover:text-blue-600 transition-opacity"
+        className="shrink-0 text-xs text-gray-400 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 hover:text-blue-600 transition-opacity"
       >
         Edit line
       </button>
@@ -143,10 +267,7 @@ function BucketSection({
               <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-current opacity-40" />
               <div className="flex-1 min-w-0">
                 {showMoveDropdown ? (
-                  <UnmappedItem
-                    row={row}
-                    onBucketChange={onBucketChange}
-                  />
+                  <UnmappedItem row={row} onBucketChange={onBucketChange} />
                 ) : (
                   <EditableLine row={row} onEdit={onTitleEdit} />
                 )}
@@ -167,6 +288,7 @@ function UnmappedItem({
   onBucketChange: (id: string, bucket: Bucket) => void;
 }) {
   const displayTitle = row.editedTitle ?? row.title;
+  // NOTE: screen does NOT show assignee for unmapped items; copy serializer matches this.
   return (
     <div className="flex flex-wrap items-start gap-2">
       <span className="flex-1 min-w-0 text-sm text-gray-700">
@@ -205,6 +327,8 @@ function GroupedSection({
   colorClass: string;
   onTitleEdit: (id: string, title: string) => void;
 }) {
+  // When grouped by assignee, the group header already shows the name — suppress per-line (name)
+  const suppressAssignee = groupMode === "assignee";
   const groups = new Map<string, DigestRow[]>();
   for (const row of rows) {
     const key =
@@ -231,7 +355,7 @@ function GroupedSection({
               <li key={row.id} className="flex items-start gap-2">
                 <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-current opacity-40" />
                 <div className="flex-1 min-w-0">
-                  <EditableLine row={row} onEdit={onTitleEdit} />
+                  <EditableLine row={row} onEdit={onTitleEdit} suppressAssignee={suppressAssignee} />
                 </div>
               </li>
             ))}
@@ -242,92 +366,21 @@ function GroupedSection({
   );
 }
 
-function CopyButtons({ rows }: { rows: DigestRow[] }) {
+// ---- Copy buttons (Fix 2: shared model, Fix 3: opaque bg) ----
+
+function CopyButtons({ model }: { model: DigestModel }) {
   const [mdState, setMdState] = useState<"idle" | "copied">("idle");
   const [ptState, setPtState] = useState<"idle" | "copied">("idle");
-
-  const buildMarkdown = useCallback(() => {
-    const sections: string[] = [];
-    const shipped = rows.filter((r) => r.bucket === "Shipped");
-    const inProgress = rows.filter((r) => r.bucket === "In Progress");
-    const blocked = rows.filter((r) => r.bucket === "Blocked");
-    const backlog = rows.filter((r) => r.bucket === "Backlog");
-    const unmapped = rows.filter((r) => r.bucket === "Unmapped");
-    const carryOver = rows.filter(
-      (r) =>
-        r.isCarryOver && r.bucket !== "Backlog" && r.bucket !== "Unmapped"
-    ).length;
-
-    const summary = `This week the team shipped ${shipped.length} ${
-      shipped.length === 1 ? "item" : "items"
-    }, has ${inProgress.length} in progress and ${blocked.length} blocked, with ${carryOver} carried over.`;
-    sections.push(summary);
-    sections.push("");
-
-    if (shipped.length > 0) {
-      sections.push(`## Shipped (${shipped.length})`);
-      for (const r of shipped) {
-        const t = r.editedTitle ?? r.title;
-        sections.push(`- ${t}${r.assignee ? ` (${r.assignee})` : ""}`);
-      }
-      sections.push("");
-    }
-    if (inProgress.length > 0) {
-      sections.push(`## In Progress (${inProgress.length})`);
-      for (const r of inProgress) {
-        const t = r.editedTitle ?? r.title;
-        const co = r.isCarryOver ? " [carry-over]" : "";
-        sections.push(
-          `- ${t}${r.assignee ? ` (${r.assignee})` : ""}${co}`
-        );
-      }
-      sections.push("");
-    }
-    if (blocked.length > 0) {
-      sections.push(`## Blocked (${blocked.length})`);
-      for (const r of blocked) {
-        const t = r.editedTitle ?? r.title;
-        sections.push(`- ${t}${r.assignee ? ` (${r.assignee})` : ""}`);
-      }
-      sections.push("");
-    }
-    if (backlog.length > 0) {
-      sections.push(`## Backlog / To Do (${backlog.length})`);
-      for (const r of backlog) {
-        const t = r.editedTitle ?? r.title;
-        sections.push(`- ${t}${r.assignee ? ` (${r.assignee})` : ""}`);
-      }
-      sections.push("");
-    }
-    if (unmapped.length > 0) {
-      sections.push(`## Unmapped (${unmapped.length})`);
-      for (const r of unmapped) {
-        const t = r.editedTitle ?? r.title;
-        sections.push(
-          `- ${t} (status: "${r.status}")${r.assignee ? ` (${r.assignee})` : ""}`
-        );
-      }
-    }
-    return sections.join("\n");
-  }, [rows]);
-
-  const buildPlainText = useCallback(() => {
-    return buildMarkdown()
-      .replace(/^## /gm, "")
-      .replace(/^- /gm, "• ");
-  }, [buildMarkdown]);
 
   const copyText = useCallback(
     async (
       text: string,
       setState: React.Dispatch<React.SetStateAction<"idle" | "copied">>
     ) => {
-      // Optimistic flip
       setState("copied");
       try {
         await navigator.clipboard.writeText(text);
       } catch {
-        // Fallback: hidden textarea
         const ta = document.createElement("textarea");
         ta.value = text;
         ta.style.position = "fixed";
@@ -343,10 +396,11 @@ function CopyButtons({ rows }: { rows: DigestRow[] }) {
   );
 
   return (
-    <div className="sticky bottom-0 bg-white border-t border-gray-200 px-4 py-3 flex gap-3 z-10">
+    // Fix 3: solid bg-gray-50 (page bg) — opaque, no bleed-through; border-t for visual separation
+    <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-4 py-3 flex gap-3 z-10">
       <button
         aria-label="Copy as Markdown"
-        onClick={() => copyText(buildMarkdown(), setMdState)}
+        onClick={() => copyText(buildMarkdown(model), setMdState)}
         className={`flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
           mdState === "copied"
             ? "bg-green-600 text-white"
@@ -359,7 +413,7 @@ function CopyButtons({ rows }: { rows: DigestRow[] }) {
       </button>
       <button
         aria-label="Copy as plain text"
-        onClick={() => copyText(buildPlainText(), setPtState)}
+        onClick={() => copyText(buildPlainText(model), setPtState)}
         className={`flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
           ptState === "copied"
             ? "bg-green-600 text-white"
@@ -374,23 +428,98 @@ function CopyButtons({ rows }: { rows: DigestRow[] }) {
   );
 }
 
+// ---- Main DigestView ----
+
 export function DigestView({
   rows,
   groupMode,
+  weekFilter,
+  availableWeeks,
+  onWeekFilterChange,
   onBucketChange,
   onTitleEdit,
+  onRemapClick,
+  suppressSuccess = false,
 }: DigestViewProps) {
-  const shipped = rows.filter((r) => r.bucket === "Shipped");
-  const inProgress = rows.filter((r) => r.bucket === "In Progress");
-  const blocked = rows.filter((r) => r.bucket === "Blocked");
-  const backlog = rows.filter((r) => r.bucket === "Backlog");
-  const unmapped = rows.filter((r) => r.bucket === "Unmapped");
+  // Fix 5: editable prose
+  const [editedProse, setEditedProse] = useState<string | null>(null);
+
+  // Fix 4: filter rows by selected week
+  const visibleRows = filterRowsByWeek(rows, weekFilter);
+
+  const shipped = visibleRows.filter((r) => r.bucket === "Shipped");
+  const inProgress = visibleRows.filter((r) => r.bucket === "In Progress");
+  const blocked = visibleRows.filter((r) => r.bucket === "Blocked");
+  const backlog = visibleRows.filter((r) => r.bucket === "Backlog");
+  const unmapped = visibleRows.filter((r) => r.bucket === "Unmapped");
+
+  const currentWeekOption = availableWeeks.find((w) => w.key === weekFilter);
+  const weekLabel = currentWeekOption?.label ?? "All dates";
+
+  const carryOver = visibleRows.filter(
+    (r) => r.isCarryOver && r.bucket !== "Backlog" && r.bucket !== "Unmapped"
+  ).length;
+
+  const autoProseText = `${weekLabel}: This week the team shipped ${shipped.length} ${
+    shipped.length === 1 ? "item" : "items"
+  }, has ${inProgress.length} in progress and ${blocked.length} blocked, with ${carryOver} carried over.`;
+
+  // Shared digest model — screen and copy serializers use the same data
+  const model: DigestModel = {
+    prose: editedProse ?? autoProseText,
+    shipped,
+    inProgress,
+    blocked,
+    backlog,
+    unmapped,
+    groupMode,
+  };
 
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white shadow-sm">
-      {/* Prose summary */}
+    // Fix 3: scroll-pb-20 ensures final rows are scrollable clear of the ~72px sticky bar
+    <div className="rounded-2xl border border-gray-200 bg-white shadow-sm" style={{ scrollPaddingBottom: "5rem" }}>
+      {/* Digest header: week selector (left) + Remap columns link (right) */}
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-100 px-6 py-3">
+        {/* Fix 4: week selector */}
+        <div className="flex items-center gap-2">
+          <label htmlFor="week-filter" className="text-xs font-medium text-gray-500 whitespace-nowrap">
+            Week:
+          </label>
+          <select
+            id="week-filter"
+            data-testid="week-filter"
+            value={weekFilter}
+            onChange={(e) => {
+              setEditedProse(null); // reset prose on week change so auto-text updates
+              onWeekFilterChange(e.target.value);
+            }}
+            className="rounded border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          >
+            {availableWeeks.map((w) => (
+              <option key={w.key} value={w.key}>
+                {w.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Fix 1: persistent Remap columns button always visible */}
+        <button
+          onClick={onRemapClick}
+          className="text-xs font-medium text-blue-600 underline hover:text-blue-800"
+          data-testid="remap-columns-btn"
+        >
+          Remap columns
+        </button>
+      </div>
+
+      {/* Editable prose summary (Fix 5) */}
       <div className="border-b border-gray-100 px-6 py-4">
-        <ProseSummary rows={rows} />
+        <EditableProseSummary
+          autoText={autoProseText}
+          editedProse={editedProse}
+          onProseEdit={setEditedProse}
+        />
       </div>
 
       <div className="px-6 py-5">
@@ -421,7 +550,7 @@ export function DigestView({
           onTitleEdit={onTitleEdit}
         />
 
-        {/* Backlog - visually muted, shown separately */}
+        {/* Backlog - visually muted */}
         {backlog.length > 0 && (
           <div className="mt-2 border-t border-gray-100 pt-4">
             <BucketSection
@@ -434,15 +563,15 @@ export function DigestView({
           </div>
         )}
 
-        {/* Unmapped status list - always rendered */}
+        {/* Unmapped status list */}
         <div className="mt-2 border-t border-gray-100 pt-4">
           {unmapped.length === 0 ? (
-            <p
-              role="status"
-              className="text-sm text-green-600 font-medium"
-            >
-              All statuses recognized ✓
-            </p>
+            // Fix 1: suppress success when core column unmapped (suppressSuccess flag from DigestApp)
+            suppressSuccess ? null : (
+              <p role="status" className="text-sm text-green-600 font-medium">
+                All statuses recognized ✓
+              </p>
+            )
           ) : (
             <section aria-label="Unmapped statuses">
               <h2 className="mb-2 text-sm font-bold uppercase tracking-wide text-amber-600">
@@ -460,7 +589,8 @@ export function DigestView({
         </div>
       </div>
 
-      <CopyButtons rows={rows} />
+      {/* Fix 2: copy from shared model; Fix 3: opaque sticky bar */}
+      <CopyButtons model={model} />
     </div>
   );
 }

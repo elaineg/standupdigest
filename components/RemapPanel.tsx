@@ -8,6 +8,7 @@ interface RemapPanelProps {
   currentMap: ColumnMap;
   onApply: (map: ColumnMap) => void;
   onClose: () => void;
+  lowConfidence?: boolean;
 }
 
 const FIELDS: { key: keyof ColumnMap; label: string }[] = [
@@ -23,6 +24,7 @@ export function RemapPanel({
   currentMap,
   onApply,
   onClose,
+  lowConfidence,
 }: RemapPanelProps) {
   const [draft, setDraft] = useState<ColumnMap>({ ...currentMap });
 
@@ -48,6 +50,11 @@ export function RemapPanel({
           ×
         </button>
       </div>
+      {lowConfidence && (
+        <p className="mb-3 text-xs text-amber-800">
+          We couldn&apos;t auto-detect which columns are which — pick them below so your digest is accurate.
+        </p>
+      )}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {FIELDS.map(({ key, label }) => (
           <div key={key}>

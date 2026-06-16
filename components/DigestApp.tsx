@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef, DragEvent } from "react";
+import { useState, useCallback, useRef, useEffect, DragEvent } from "react";
 import {
   parseCSVText,
   type DigestRow,
@@ -10,10 +10,15 @@ import {
   type ParseResult,
 } from "@/lib/csvParser";
 import { SAMPLE_CSV } from "@/lib/sampleData";
-import { DigestView } from "@/components/DigestView";
+import {
+  DigestView,
+  computeWeekOptions,
+  type WeekOption,
+} from "@/components/DigestView";
 import { RemapPanel } from "@/components/RemapPanel";
 
 const LS_MAP_KEY = (source: string) => `standupdigest-colmap-${source}`;
+const LS_GROUP_KEY = "standupdigest-groupmode";
 
 function loadSavedMap(source: string): Partial<ColumnMap> | null {
   try {
@@ -33,44 +38,96 @@ function saveMap(source: string, map: ColumnMap) {
   }
 }
 
+// Fix 1: determine if any core column failed to auto-detect
+function coreColumnsMissing(columnMap: ColumnMap): boolean {
+  return !columnMap.title || !columnMap.status || !columnMap.assignee;
+}
+
 export default function DigestApp() {
-  // SSR-safe: init all state to null/empty, hydrate via effect
   const [parseResult, setParseResult] = useState<ParseResult | null>(null);
   const [rows, setRows] = useState<DigestRow[]>([]);
   const [groupMode, setGroupMode] = useState<GroupMode>("assignee");
   const [showRemap, setShowRemap] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [rawCSV, setRawCSV] = useState<string>("");
+  // Fix 4: week filter state
+  const [weekFilter, setWeekFilter] = useState<string>("all");
+  const [availableWeeks, setAvailableWeeks] = useState<WeekOption[]>([]);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const processCSV = useCallback((text: string, overrideMap?: Partial<ColumnMap>) => {
+  // Restore groupMode from localStorage after mount (SSR-safe: never read window in render/lazy-init)
+  useEffect(() => {
     try {
-      const result = parseCSVText(text, overrideMap);
-      if (result.rows.length === 0) {
-        setErrorMsg("No data rows found in the CSV.");
-        return;
+      const saved = window.localStorage.getItem(LS_GROUP_KEY);
+      if (saved === "assignee" || saved === "epic") {
+        setGroupMode(saved);
       }
-      setErrorMsg(null);
-
-      // Check localStorage for saved mapping (read directly, not from closure)
-      const saved = loadSavedMap(result.source);
-      const effectiveOverride = overrideMap ?? saved ?? undefined;
-
-      const finalResult = effectiveOverride
-        ? parseCSVText(text, effectiveOverride)
-        : result;
-
-      setParseResult(finalResult);
-      setRows(finalResult.rows);
-      setShowRemap(finalResult.confidence === "low" && !effectiveOverride);
-    } catch (e) {
-      setErrorMsg("Failed to parse CSV. Please check the file format.");
-      console.error(e);
+    } catch {
+      // ignore (private browsing / storage disabled)
     }
   }, []);
 
-  // Store raw CSV text for re-parse on remap
-  const [rawCSV, setRawCSV] = useState<string>("");
+  // Persist groupMode whenever it changes (after mount)
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(LS_GROUP_KEY, groupMode);
+    } catch {
+      // ignore
+    }
+  }, [groupMode]);
+
+  // Fix 1: whether any core column is missing (drives amber banner + suppressSuccess)
+  const hasCoreMissing = parseResult
+    ? coreColumnsMissing(parseResult.columnMap)
+    : false;
+
+  // Fix 1: open remap whenever low-confidence OR any core column missing
+  const shouldAutoOpenRemap = useCallback(
+    (result: ParseResult, overrideUsed: boolean): boolean => {
+      if (overrideUsed) return false; // user already remapped
+      return result.confidence === "low" || coreColumnsMissing(result.columnMap);
+    },
+    []
+  );
+
+  const processCSV = useCallback(
+    (text: string, overrideMap?: Partial<ColumnMap>) => {
+      try {
+        const result = parseCSVText(text, overrideMap);
+        if (result.rows.length === 0) {
+          setErrorMsg("No data rows found in the CSV.");
+          return;
+        }
+        setErrorMsg(null);
+
+        const saved = loadSavedMap(result.source);
+        const effectiveOverride = overrideMap ?? saved ?? undefined;
+
+        const finalResult = effectiveOverride
+          ? parseCSVText(text, effectiveOverride)
+          : result;
+
+        setParseResult(finalResult);
+        setRows(finalResult.rows);
+
+        // Fix 4: compute available weeks and default to most recent
+        const weeks = computeWeekOptions(finalResult.rows);
+        setAvailableWeeks(weeks);
+        // Default to most recent week (first option, if it's not "all")
+        const defaultWeek = weeks.length > 1 ? weeks[0].key : "all";
+        setWeekFilter(defaultWeek);
+
+        // Fix 1: auto-open remap on missing core column OR low confidence
+        setShowRemap(shouldAutoOpenRemap(finalResult, !!effectiveOverride));
+      } catch (e) {
+        setErrorMsg("Failed to parse CSV. Please check the file format.");
+        console.error(e);
+      }
+    },
+    [shouldAutoOpenRemap]
+  );
 
   const handleFile = useCallback(
     (file: File) => {
@@ -96,6 +153,8 @@ export default function DigestApp() {
     setRawCSV("");
     setErrorMsg(null);
     setShowRemap(false);
+    setWeekFilter("all");
+    setAvailableWeeks([]);
   }, []);
 
   const handleDrop = useCallback(
@@ -132,6 +191,11 @@ export default function DigestApp() {
       const reParsed = parseCSVText(rawCSV, newMap);
       setParseResult({ ...reParsed, columnMap: newMap, confidence: "high" });
       setRows(reParsed.rows);
+      // Recompute weeks after remap (date column may have changed)
+      const weeks = computeWeekOptions(reParsed.rows);
+      setAvailableWeeks(weeks);
+      const defaultWeek = weeks.length > 1 ? weeks[0].key : "all";
+      setWeekFilter(defaultWeek);
       setShowRemap(false);
     },
     [parseResult, rawCSV]
@@ -140,9 +204,7 @@ export default function DigestApp() {
   const handleRowBucketChange = useCallback(
     (rowId: string, newBucket: Bucket) => {
       setRows((prev) =>
-        prev.map((r) =>
-          r.id === rowId ? { ...r, bucket: newBucket } : r
-        )
+        prev.map((r) => (r.id === rowId ? { ...r, bucket: newBucket } : r))
       );
     },
     []
@@ -160,6 +222,13 @@ export default function DigestApp() {
   );
 
   const hasDigest = rows.length > 0;
+
+  // Fix 1: show amber banner when any core column missing (not just overall low confidence)
+  const showAmberBanner =
+    hasDigest &&
+    parseResult &&
+    (parseResult.confidence === "low" || hasCoreMissing) &&
+    !showRemap;
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -242,20 +311,19 @@ export default function DigestApp() {
               >
                 Load sample data
               </button>
+              <p className="text-center text-sm text-gray-400">
+                Your file never leaves your browser — no upload, no signup.
+              </p>
             </div>
           </div>
         )}
 
-        {/* Privacy line */}
-        {!hasDigest && (
-          <p className="mt-3 text-center text-sm text-gray-400">
-            Your file never leaves your browser — no upload, no signup.
-          </p>
-        )}
-
         {/* Error */}
         {errorMsg && (
-          <div role="alert" className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div
+            role="alert"
+            className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700"
+          >
             {errorMsg}
           </div>
         )}
@@ -263,7 +331,7 @@ export default function DigestApp() {
         {/* Populated digest */}
         {hasDigest && parseResult && (
           <div>
-            {/* Top bar with file controls */}
+            {/* Top bar with file controls + group-by */}
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-3">
                 <button
@@ -316,8 +384,8 @@ export default function DigestApp() {
               </div>
             </div>
 
-            {/* Low-confidence remap banner */}
-            {parseResult.confidence === "low" && !showRemap && (
+            {/* Fix 1: amber banner when any core column missing OR low confidence */}
+            {showAmberBanner && (
               <div
                 role="status"
                 className="mb-4 flex items-center justify-between rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800"
@@ -340,14 +408,22 @@ export default function DigestApp() {
                 currentMap={parseResult.columnMap}
                 onApply={handleRemap}
                 onClose={() => setShowRemap(false)}
+                lowConfidence={
+                  parseResult.confidence === "low" || hasCoreMissing
+                }
               />
             )}
 
             <DigestView
               rows={rows}
               groupMode={groupMode}
+              weekFilter={weekFilter}
+              availableWeeks={availableWeeks}
+              onWeekFilterChange={setWeekFilter}
               onBucketChange={handleRowBucketChange}
               onTitleEdit={handleRowTitleEdit}
+              onRemapClick={() => setShowRemap(true)}
+              suppressSuccess={hasCoreMissing}
             />
           </div>
         )}
