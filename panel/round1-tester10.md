@@ -1,0 +1,14 @@
+```json
+{
+  "name": "Rob",
+  "role": "Brand/visual designer, freelance",
+  "clarity": "Yes",
+  "clarity_reason": "Within 5s the H1 'Turn your tracker export into a weekly status — in seconds' plus the subtext naming Jira/Linear/Asana/GitHub CSV made the job obvious, and the two tabs 'Weekly Status' / 'Sprint Review' are right at the top so the two modes are immediately visible. It's clearly a tool for engineering/PM team leads — and clearly NOT for a solo designer like me.",
+  "value": "No",
+  "value_reason": "I'm a freelance brand designer. I have no team, no Jira/Linear board, no sprint, and no story points to report. Sprint Review is mechanically excellent — velocity (21 of 34 shipped), scope change, spillover with the carried-over items listed, and a by-assignee points breakdown — but every one of those is a concept that does not exist in my work. The closest thing I do is tell a client 'here's what shipped this week,' and I do that in a 3-line Slack message or a Loom; I'd never export a CSV to make it. Zero of my recurring tasks map to this. My honest reaction is 'I could write my client update in Slack in 2 minutes' — there's nothing here to save.",
+  "advocacy": 2,
+  "advocacy_reason": "2 reflects that the app is genuinely well-made (no errors, fast, copy output exactly matches the screen, sensible CSV-in/markdown-out flow) — not that I'd recommend it. I would never bring this up unprompted because nobody in my circle (designers, illustrators, small studios) runs sprints. The only path to a recommendation is if a dev/PM friend happened to complain about writing standups in front of me; even then I'd say 'I saw a thing' at best. For my own audience it's a 0.",
+  "top_fix": "Nothing you build on THIS tool will reach me — the fix is audience, not feature: a freelance designer has no team tracker, so I'm structurally out of scope. If you want a designer like me, the equivalent would be 'turn a Figma/Drive folder of delivered assets into a client-ready 'what shipped this week' recap' — a different product.",
+  "notes": "Tested cold on desktop. Loaded sample data, both tabs render correctly. Sprint Review shows VELOCITY/SCOPE CHANGE/SPILLOVER/BY ASSIGNEE clearly with color cues. Sprint selector (Sprint 24/23/22) works — switching to Sprint 23 correctly changed velocity to '0 of 9 points shipped'. Copy Markdown output matched the on-screen content exactly (headings, spillover list, per-assignee bullets). 0 console errors. Minor friction: the fixed 'Copy Markdown / Copy plain text' bar overlaps the bottom of the By-Assignee list (Carol's row is partly hidden behind it) on a 900px-tall viewport. Inline 'Edit line' buttons are present and open an editor; couldn't cleanly confirm the saved edit in my scripted pass but saw no error — likely a test-harness selector issue, not an app bug."
+}
+```

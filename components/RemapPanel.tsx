@@ -11,13 +11,56 @@ interface RemapPanelProps {
   lowConfidence?: boolean;
 }
 
-const FIELDS: { key: keyof ColumnMap; label: string }[] = [
+const CORE_FIELDS: { key: keyof ColumnMap; label: string }[] = [
   { key: "title", label: "Title / Summary" },
   { key: "status", label: "Status" },
   { key: "assignee", label: "Assignee" },
   { key: "epic", label: "Epic / Group" },
   { key: "date", label: "Updated / Resolved Date" },
 ];
+
+const SPRINT_FIELDS: { key: keyof ColumnMap; label: string }[] = [
+  { key: "storyPoints", label: "Story Points / Estimate" },
+  { key: "sprint", label: "Sprint / Cycle" },
+  { key: "added", label: "Added-date (scope change)" },
+  { key: "removed", label: "Removed-date (scope change)" },
+];
+
+function FieldSelect({
+  field,
+  headers,
+  value,
+  onChange,
+}: {
+  field: { key: keyof ColumnMap; label: string };
+  headers: string[];
+  value: string;
+  onChange: (val: string) => void;
+}) {
+  return (
+    <div>
+      <label
+        htmlFor={`remap-${field.key}`}
+        className="mb-1 block text-xs font-medium text-amber-800"
+      >
+        {field.label}
+      </label>
+      <select
+        id={`remap-${field.key}`}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full rounded border border-amber-300 bg-white px-2 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-amber-500"
+      >
+        <option value="">(none)</option>
+        {headers.map((h) => (
+          <option key={h} value={h}>
+            {h}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
 
 export function RemapPanel({
   headers,
@@ -31,6 +74,9 @@ export function RemapPanel({
   const handleApply = () => {
     onApply(draft);
   };
+
+  const setField = (key: keyof ColumnMap, val: string) =>
+    setDraft((prev) => ({ ...prev, [key]: val }));
 
   return (
     <div
@@ -55,33 +101,38 @@ export function RemapPanel({
           We couldn&apos;t auto-detect which columns are which — pick them below so your digest is accurate.
         </p>
       )}
+
+      {/* Core fields */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        {FIELDS.map(({ key, label }) => (
-          <div key={key}>
-            <label
-              htmlFor={`remap-${key}`}
-              className="mb-1 block text-xs font-medium text-amber-800"
-            >
-              {label}
-            </label>
-            <select
-              id={`remap-${key}`}
-              value={draft[key]}
-              onChange={(e) =>
-                setDraft((prev) => ({ ...prev, [key]: e.target.value }))
-              }
-              className="w-full rounded border border-amber-300 bg-white px-2 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-amber-500"
-            >
-              <option value="">(none)</option>
-              {headers.map((h) => (
-                <option key={h} value={h}>
-                  {h}
-                </option>
-              ))}
-            </select>
-          </div>
+        {CORE_FIELDS.map((field) => (
+          <FieldSelect
+            key={field.key}
+            field={field}
+            headers={headers}
+            value={draft[field.key]}
+            onChange={(v) => setField(field.key, v)}
+          />
         ))}
       </div>
+
+      {/* Sprint Review fields */}
+      <div className="mt-4 border-t border-amber-200 pt-3">
+        <p className="mb-2 text-xs font-semibold text-amber-700 uppercase tracking-wide">
+          Sprint Review columns (optional)
+        </p>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {SPRINT_FIELDS.map((field) => (
+            <FieldSelect
+              key={field.key}
+              field={field}
+              headers={headers}
+              value={draft[field.key]}
+              onChange={(v) => setField(field.key, v)}
+            />
+          ))}
+        </div>
+      </div>
+
       <div className="mt-4 flex gap-3">
         <button
           onClick={handleApply}

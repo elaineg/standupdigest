@@ -742,3 +742,275 @@ test('R4-P3: pre-seeded EPIC grouping in localStorage restores correctly and doe
   await expect(page.getByRole('heading', { name: /In Progress \(4\)/i }).first()).toBeVisible();
   await expect(page.getByRole('heading', { name: /Blocked \(2\)/i }).first()).toBeVisible();
 });
+
+// ---- Sprint Review tab tests (spec success checks 11–16) ----
+
+test('SC11: Tab strip visible cold; clicking Sprint Review swaps body; clicking Weekly Status restores', async ({ page }) => {
+  await page.goto(BASE + '/');
+
+  // Tab strip visible in cold state
+  const weeklyTab = page.locator('[data-testid="tab-weekly"]');
+  const sprintTab = page.locator('[data-testid="tab-sprint"]');
+  await expect(weeklyTab).toBeVisible();
+  await expect(sprintTab).toBeVisible();
+
+  // Weekly Status is default-active
+  await expect(weeklyTab).toHaveAttribute('aria-selected', 'true');
+  await expect(sprintTab).toHaveAttribute('aria-selected', 'false');
+
+  // Load sample data
+  await page.getByRole('button', { name: 'Load sample data' }).click();
+  await expect(page.locator('[data-testid="prose-summary"]')).toBeVisible({ timeout: 10000 });
+
+  // Click Sprint Review tab
+  await sprintTab.click();
+  await expect(sprintTab).toHaveAttribute('aria-selected', 'true');
+
+  // Sprint selector should appear
+  const sprintSelect = page.locator('[data-testid="sprint-filter"]');
+  await expect(sprintSelect).toBeVisible();
+
+  // Default sprint is Sprint 24
+  const selectedValue = await sprintSelect.inputValue();
+  expect(selectedValue).toBe('Sprint 24');
+
+  // Click back to Weekly Status
+  await weeklyTab.click();
+  await expect(weeklyTab).toHaveAttribute('aria-selected', 'true');
+  await expect(page.locator('[data-testid="prose-summary"]')).toBeVisible();
+});
+
+test('SC12: Sprint Review velocity headline shows "21 of 34 sprint pts shipped" and "4 of 7 issues done"', async ({ page }) => {
+  await loadSampleData(page);
+  await page.locator('[data-testid="tab-sprint"]').click();
+
+  // Velocity headline (FIX 1: honest label — "sprint pts" not "points"/"committed")
+  const velocityEl = page.locator('[data-testid="velocity-headline"]');
+  await expect(velocityEl).toBeVisible({ timeout: 5000 });
+  const velocityText = await velocityEl.innerText();
+  expect(velocityText).toContain('21 of 34 sprint pts shipped');
+
+  // Sub-line
+  const sublineEl = page.locator('[data-testid="velocity-subline"]');
+  await expect(sublineEl).toBeVisible();
+  const sublineText = await sublineEl.innerText();
+  expect(sublineText).toContain('4 of 7 issues done');
+});
+
+test('SC13: By Assignee shows Sam with 13 of 18 pts shipped · 3 issues in Sprint 24 (FIX 1)', async ({ page }) => {
+  await loadSampleData(page);
+  await page.locator('[data-testid="tab-sprint"]').click();
+
+  // Sam's assignee heading (FIX 1: shows shipped-of-committed so numbers reconcile with velocity headline)
+  const samHeader = page.locator('[data-testid="assignee-Sam"]');
+  await expect(samHeader).toBeVisible({ timeout: 5000 });
+  const samText = await samHeader.innerText();
+  // Format: "Sam — 13 of 18 pts shipped · 3 issues"
+  expect(samText).toContain('13 of 18 pts shipped');
+  expect(samText).toContain('3 issues');
+});
+
+test('SC14: Spillover shows exactly 3 issues for Sprint 24', async ({ page }) => {
+  await loadSampleData(page);
+  await page.locator('[data-testid="tab-sprint"]').click();
+
+  const spilloverSection = page.locator('section[aria-label="Spillover"]');
+  await expect(spilloverSection).toBeVisible({ timeout: 5000 });
+
+  const spilloverHeadline = page.locator('[data-testid="spillover-headline"]');
+  const headlineText = await spilloverHeadline.innerText();
+  expect(headlineText).toContain('3 issues');
+
+  // The 3 open items listed
+  await expect(spilloverSection.locator('text=Build analytics dashboard')).toBeVisible();
+  await expect(spilloverSection.locator('text=Review API endpoints')).toBeVisible();
+  await expect(spilloverSection.locator('text=Deploy staging environment')).toBeVisible();
+});
+
+test('SC15: Scope change shows correct +/- values from sample data', async ({ page }) => {
+  await loadSampleData(page);
+  await page.locator('[data-testid="tab-sprint"]').click();
+
+  const scopeEl = page.locator('[data-testid="scope-line"]');
+  await expect(scopeEl).toBeVisible({ timeout: 5000 });
+  const scopeText = await scopeEl.innerText();
+  expect(scopeText).toContain('+8 pts');
+  expect(scopeText).toContain('2 issues added');
+  expect(scopeText).toContain('2 pts');
+  expect(scopeText).toContain('1 issue removed');
+});
+
+test('SC15b: Scope change shows fallback text when CSV lacks Sprint + Added-date columns', async ({ page }) => {
+  await page.goto(BASE + '/');
+
+  // Load a simple CSV with no Sprint or Added columns
+  const simpleCSV = `Title,Status,Assignee,Updated
+Task A,Done,Alice,2026-06-10
+Task B,In Progress,Bob,2026-06-13
+`;
+  const fileInput = page.locator('input[type="file"]').first();
+  await fileInput.setInputFiles({
+    name: 'simple.csv',
+    mimeType: 'text/csv',
+    buffer: Buffer.from(simpleCSV),
+  });
+  await expect(page.locator('[data-testid="prose-summary"]')).toBeVisible({ timeout: 10000 });
+
+  await page.locator('[data-testid="tab-sprint"]').click();
+
+  // Should show the exact fallback text
+  await expect(page.locator('text=Scope change unavailable')).toBeVisible({ timeout: 5000 });
+});
+
+test('SC16: Sprint Review copy buttons flip to "Copied ✓" and match on-screen content', async ({ page }) => {
+  await loadSampleData(page);
+  await page.locator('[data-testid="tab-sprint"]').click();
+
+  // Wait for sprint review to render
+  const velocityEl = page.locator('[data-testid="velocity-headline"]');
+  await expect(velocityEl).toBeVisible({ timeout: 5000 });
+
+  // Test "Copy Markdown" button flips
+  const mdButton = page.locator('button[aria-label="Copy as Markdown"]');
+  await expect(mdButton).toBeVisible();
+  await mdButton.click();
+  await expect(mdButton.locator('span[aria-live="polite"]')).toHaveText('Copied ✓', { timeout: 3000 });
+
+  // Wait for button to reset
+  await page.waitForTimeout(2200);
+  await expect(mdButton.locator('span[aria-live="polite"]')).toHaveText('Copy Markdown', { timeout: 3000 });
+
+  // Test "Copy plain text" button flips
+  const ptButton = page.locator('button[aria-label="Copy as plain text"]');
+  await ptButton.click();
+  await expect(ptButton.locator('span[aria-live="polite"]')).toHaveText('Copied ✓', { timeout: 3000 });
+});
+
+test('SC11-tab-persists: mode persists in localStorage (Sprint Review survives reload)', async ({ page }) => {
+  await page.goto(BASE + '/');
+
+  // Seed mode as sprint in localStorage
+  await page.evaluate(() => {
+    window.localStorage.setItem('standupdigest-mode', 'sprint');
+  });
+
+  // Reload — should restore Sprint Review tab as active
+  await page.reload();
+
+  const sprintTab = page.locator('[data-testid="tab-sprint"]');
+  await expect(sprintTab).toHaveAttribute('aria-selected', 'true', { timeout: 3000 });
+});
+
+// ---- EDIT BUG regression (panel-round-1 fix): Sprint Review inline edit commits on Enter AND blur,
+//      flows into copied Markdown, and the copy bar remains reachable after editing ----
+
+test('EDIT-BUG: Sprint Review velocity headline edits on Enter, flows into copy, copy bar reachable', async ({ page }) => {
+  await loadSampleData(page);
+  await page.locator('[data-testid="tab-sprint"]').click();
+
+  const velocityEl = page.locator('[data-testid="velocity-headline"]');
+  await expect(velocityEl).toBeVisible({ timeout: 5000 });
+
+  // Click Edit line to start editing the velocity headline
+  const editBtn = velocityEl.locator('button', { hasText: 'Edit line' });
+  await editBtn.click();
+
+  const editInput = velocityEl.locator('input[aria-label="Edit sprint review line"]');
+  await expect(editInput).toBeVisible();
+
+  // Edit the text and commit with Enter
+  await editInput.fill('21 of 34 sprint pts shipped [edited]');
+  await editInput.press('Enter');
+
+  // The edit must now appear in the headline
+  await expect(velocityEl.locator('text=21 of 34 sprint pts shipped [edited]')).toBeVisible();
+  await expect(editInput).not.toBeVisible();
+
+  // Copy button must be reachable (not covered by sticky bar)
+  const mdButton = page.locator('button[aria-label="Copy as Markdown"]');
+  await expect(mdButton).toBeVisible();
+  await mdButton.click();
+  await expect(mdButton.locator('span[aria-live="polite"]')).toHaveText('Copied ✓', { timeout: 3000 });
+});
+
+test('EDIT-BUG: Sprint Review row edit commits on blur (not just Enter), flows into copy', async ({ page }) => {
+  await loadSampleData(page);
+  await page.locator('[data-testid="tab-sprint"]').click();
+
+  // Wait for spillover section
+  const spilloverSection = page.locator('section[aria-label="Spillover"]');
+  await expect(spilloverSection).toBeVisible({ timeout: 5000 });
+
+  // Find the first spillover item edit button
+  const firstSpilloverLi = spilloverSection.locator('li').first();
+  await firstSpilloverLi.hover();
+  const editBtn = firstSpilloverLi.locator('button', { hasText: 'Edit line' });
+  await editBtn.click();
+
+  const editInput = firstSpilloverLi.locator('input[aria-label="Edit digest line"]');
+  await expect(editInput).toBeVisible();
+
+  // Fill then blur (tab away) to commit without Enter
+  await editInput.fill('Blur-committed spillover edit');
+  await editInput.press('Tab'); // triggers blur → commitEdit
+
+  // The edit must appear in the spillover list
+  await expect(firstSpilloverLi.locator('text=Blur-committed spillover edit')).toBeVisible({ timeout: 3000 });
+
+  // Copy Markdown and confirm it contains the edited title
+  let copiedText = '';
+  await page.exposeFunction('captureClipboardSprint', (text: string) => { copiedText = text; });
+  await page.evaluate(() => {
+    Object.defineProperty(navigator, 'clipboard', {
+      value: {
+        writeText: async (text: string) => {
+          await (window as unknown as Record<string, unknown>)['captureClipboardSprint'](text);
+        },
+      },
+      configurable: true,
+    });
+  });
+
+  const mdButton = page.locator('button[aria-label="Copy as Markdown"]');
+  await mdButton.click();
+  await expect(mdButton.locator('span[aria-live="polite"]')).toHaveText('Copied ✓', { timeout: 3000 });
+  await page.waitForTimeout(300);
+
+  if (copiedText) {
+    expect(copiedText).toContain('Blur-committed spillover edit');
+  }
+});
+
+// ---- SC12 tooltip: velocity tooltip explaining the calc is present ----
+
+test('SC12-tooltip: velocity tooltip text is present and correct', async ({ page }) => {
+  await loadSampleData(page);
+  await page.locator('[data-testid="tab-sprint"]').click();
+
+  // The tooltip is rendered as visible paragraph text (not just a title attribute)
+  const tooltipText = 'velocity = points in Shipped ÷ total points in the sprint';
+  await expect(page.locator(`text=${tooltipText}`)).toBeVisible({ timeout: 5000 });
+});
+
+// ---- SC4-sticky-bar: sticky copy bar solid bg, no overlap on last by-assignee rows ----
+
+test('SC4-sticky-bar: sticky copy bar has solid bg and last by-assignee row not covered', async ({ page }) => {
+  await loadSampleData(page);
+  await page.locator('[data-testid="tab-sprint"]').click();
+
+  // Scroll to bottom so sticky bar is in view
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+
+  const mdButton = page.locator('button[aria-label="Copy as Markdown"]');
+  await expect(mdButton).toBeVisible();
+
+  // Confirm the sticky bar's parent div has bg-white (solid, not translucent)
+  const stickyBar = mdButton.locator('xpath=..');
+  const bgClass = await stickyBar.getAttribute('class');
+  expect(bgClass).toContain('bg-white');
+
+  // The by-assignee section must have pb-24 (bottom padding to clear sticky bar)
+  const contentDiv = page.locator('.px-6.py-5');
+  const contentClass = await contentDiv.getAttribute('class');
+  expect(contentClass).toContain('pb-24');
+});

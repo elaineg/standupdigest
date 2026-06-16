@@ -1,0 +1,14 @@
+```json
+{
+  "name": "Tomás",
+  "role": "Operations analyst at a mid-size company",
+  "clarity": "Yes",
+  "clarity_reason": "Landing reads 'Turn your tracker export into a weekly status — in seconds' with subcopy naming Jira/Linear/Asana/GitHub CSV, and a 'Your file never leaves your browser — no upload, no signup' line that directly answers my data-trust worry. The two tabs 'Weekly Status' / 'Sprint Review' are right at the top and obviously a mode toggle. I knew within 5s what it does, who it's for, and that there are two modes.",
+  "value": "Yes",
+  "value_reason": "This is my exact weekly chore. Today I export a Jira CSV and hand-bucket Shipped/In-Progress/Blocked grouped by assignee in Excel — easily 20-30 min. Weekly Status produced that digest instantly with carry-over tags and an 'UNMAPPED STATUS' remapper for our custom statuses like 'Needs Triage Review'. Sprint Review is even more useful for my stakeholder retros: velocity (21 of 34 pts), scope change, spillover, and a by-assignee points breakdown — all things I currently compute by pivot table. I dropped my OWN ops-style Jira CSV and it auto-detected Story Points + Sprint, computed velocity 10 of 31, and degraded gracefully ('Scope change unavailable — needs a Sprint + Added-date column') instead of breaking. Client-side + no signup means I can actually use it on company data.",
+  "advocacy": 8,
+  "advocacy_reason": "Genuinely solves a recurring, real task and the no-upload promise lets me use it at work — I'd bring this up to my analyst peers. Not a 9/10 because: (1) the inline 'Edit line' + Save flow I couldn't fully confirm round-trips into the copied Markdown in my automated check (it edits on screen fine, but I'm not 100% sure an edit survives a copy), and (2) the Sprint 23 sample is confusing — it shows '0 of 9 points shipped' yet lists spillover and per-assignee points, which made me briefly distrust the numbers until I realized it's just a sparse sample sprint. Real sprints (Sprint 24, my own CSV) computed correctly.",
+  "top_fix": "Make Sprint Review trustworthy at a glance: fix/relabel the misleading 'Sprint 23' sample (0 shipped but has points) so the velocity math is obviously self-consistent, and add a tiny 'velocity = done points / committed points' tooltip so an analyst trusts the number on first read.",
+  "notes": "No console errors on any flow. Weekly + Sprint both load sample cleanly. Copy Markdown/plaintext correctly matched the DISPLAYED sprint after I changed the selector (Sprint 23 copy = Sprint 23 screen) — no stale-copy bug. My own 6-row Jira CSV imported and bucketed correctly with 'All statuses recognized ✓'. Sprint selector works (Sprint 24/23/22). Inline 'Edit line' opens an editable field + Save link (verified visually). Couldn't auto-confirm edit-persists-into-copy round trip (Save changed page state in my script) — flagged as minor uncertainty, not a confirmed regression. clipboard verified by read in test env."
+}
+```

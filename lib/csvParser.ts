@@ -11,6 +11,10 @@ export interface ColumnMap {
   assignee: string;
   epic: string;
   date: string;
+  storyPoints: string;
+  sprint: string;
+  added: string;   // date a row was added mid-sprint (for scope change)
+  removed: string; // date a row was removed from sprint (for scope change)
 }
 
 export interface DigestRow {
@@ -23,6 +27,10 @@ export interface DigestRow {
   bucket: Bucket;
   isCarryOver: boolean;
   editedTitle?: string;
+  storyPoints: number;   // 0 if missing/unparseable
+  sprint: string;        // raw sprint/cycle value
+  addedDate: string;     // date added mid-sprint (empty if not applicable)
+  removedDate: string;   // date removed from sprint (empty if not applicable)
 }
 
 export interface ParseResult {
@@ -79,6 +87,36 @@ const DATE_ALIASES = [
   "updated_at",
   "closed_at",
   "close date",
+];
+
+// Sprint Review tab — additional alias maps
+const STORY_POINTS_ALIASES = [
+  "story points",
+  "story point estimate",
+  "custom field (story points)",
+  "estimate",
+  "points",
+];
+
+const SPRINT_ALIASES = [
+  "sprint",
+  "cycle",
+  "iteration",
+  "milestone",
+];
+
+const ADDED_ALIASES = [
+  "added",
+  "added date",
+  "date added",
+  "created in sprint",
+];
+
+const REMOVED_ALIASES = [
+  "removed",
+  "removed date",
+  "date removed",
+  "removed from sprint",
 ];
 
 // ---- Status→Bucket keyword map ----
@@ -155,12 +193,16 @@ export function autoDetectColumns(headers: string[]): {
   const assignee = matchHeader(headers, ASSIGNEE_ALIASES);
   const epic = matchHeader(headers, EPIC_ALIASES);
   const date = matchHeader(headers, DATE_ALIASES);
+  const storyPoints = matchHeader(headers, STORY_POINTS_ALIASES);
+  const sprint = matchHeader(headers, SPRINT_ALIASES);
+  const added = matchHeader(headers, ADDED_ALIASES);
+  const removed = matchHeader(headers, REMOVED_ALIASES);
 
   const found = [title, status, assignee].filter(Boolean).length;
   const confidence = found >= 2 ? "high" : "low";
 
   return {
-    columnMap: { title, status, assignee, epic, date },
+    columnMap: { title, status, assignee, epic, date, storyPoints, sprint, added, removed },
     confidence,
   };
 }
@@ -260,6 +302,10 @@ export function parseCSVText(
     assignee: overrideMap?.assignee ?? autoMap.assignee,
     epic: overrideMap?.epic ?? autoMap.epic,
     date: overrideMap?.date ?? autoMap.date,
+    storyPoints: overrideMap?.storyPoints ?? autoMap.storyPoints,
+    sprint: overrideMap?.sprint ?? autoMap.sprint,
+    added: overrideMap?.added ?? autoMap.added,
+    removed: overrideMap?.removed ?? autoMap.removed,
   };
 
   // Compute a single reference date from the dataset's own most-recent date.
@@ -273,6 +319,12 @@ export function parseCSVText(
     const assignee = (columnMap.assignee ? row[columnMap.assignee] : "") ?? "";
     const epic = (columnMap.epic ? row[columnMap.epic] : "") ?? "";
     const date = (columnMap.date ? row[columnMap.date] : "") ?? "";
+    const rawPoints = (columnMap.storyPoints ? row[columnMap.storyPoints] : "") ?? "";
+    const sprint = (columnMap.sprint ? row[columnMap.sprint] : "") ?? "";
+    const addedDate = (columnMap.added ? row[columnMap.added] : "") ?? "";
+    const removedDate = (columnMap.removed ? row[columnMap.removed] : "") ?? "";
+
+    const storyPoints = rawPoints !== "" ? Math.max(0, parseFloat(rawPoints) || 0) : 0;
 
     // GitHub: use GitHub-specific bucket logic (open→In Progress, labels→Blocked override)
     const bucket = status
@@ -292,6 +344,10 @@ export function parseCSVText(
       date: date.trim(),
       bucket,
       isCarryOver,
+      storyPoints,
+      sprint: sprint.trim(),
+      addedDate: addedDate.trim(),
+      removedDate: removedDate.trim(),
     };
   });
 

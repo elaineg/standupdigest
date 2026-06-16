@@ -15,10 +15,14 @@ import {
   computeWeekOptions,
   type WeekOption,
 } from "@/components/DigestView";
+import { SprintReviewView } from "@/components/SprintReviewView";
 import { RemapPanel } from "@/components/RemapPanel";
 
 const LS_MAP_KEY = (source: string) => `standupdigest-colmap-${source}`;
 const LS_GROUP_KEY = "standupdigest-groupmode";
+const LS_MODE_KEY = "standupdigest-mode";
+
+type AppMode = "weekly" | "sprint";
 
 function loadSavedMap(source: string): Partial<ColumnMap> | null {
   try {
@@ -54,6 +58,8 @@ export default function DigestApp() {
   // Fix 4: week filter state
   const [weekFilter, setWeekFilter] = useState<string>("all");
   const [availableWeeks, setAvailableWeeks] = useState<WeekOption[]>([]);
+  // Tab mode: "weekly" (default) | "sprint"
+  const [mode, setMode] = useState<AppMode>("weekly");
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -69,6 +75,18 @@ export default function DigestApp() {
     }
   }, []);
 
+  // Restore mode from localStorage after mount (defaults to "weekly" if unset)
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem(LS_MODE_KEY);
+      if (saved === "weekly" || saved === "sprint") {
+        setMode(saved);
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
   // Persist groupMode whenever it changes (after mount)
   useEffect(() => {
     try {
@@ -77,6 +95,15 @@ export default function DigestApp() {
       // ignore
     }
   }, [groupMode]);
+
+  // Persist mode whenever it changes
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(LS_MODE_KEY, mode);
+    } catch {
+      // ignore
+    }
+  }, [mode]);
 
   // Fix 1: whether any core column is missing (drives amber banner + suppressSuccess)
   const hasCoreMissing = parseResult
@@ -223,12 +250,22 @@ export default function DigestApp() {
 
   const hasDigest = rows.length > 0;
 
-  // Fix 1: show amber banner when any core column missing (not just overall low confidence)
+  // Fix 1: show amber banner when any core column missing OR low confidence
   const showAmberBanner =
     hasDigest &&
     parseResult &&
     (parseResult.confidence === "low" || hasCoreMissing) &&
     !showRemap;
+
+  // Detect Sprint Review column availability
+  const hasSprintColumn = parseResult ? !!parseResult.columnMap.sprint : false;
+  const hasAddedColumn = parseResult ? !!parseResult.columnMap.added : false;
+
+  // Subtitle text varies by active tab (cold state)
+  const coldSubtitle =
+    mode === "sprint"
+      ? "Drop the same CSV — get velocity, scope change, spillover, and points by assignee for a sprint."
+      : "Drop a Jira, Linear, Asana, or GitHub CSV. Get a Shipped / In Progress / Blocked digest ready to paste into Slack.";
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -242,6 +279,36 @@ export default function DigestApp() {
       </header>
 
       <div className="mx-auto max-w-4xl px-4 py-8">
+        {/* Tab strip — visible in both cold and populated states, above the dropzone/digest */}
+        <div className="mb-6 flex rounded-lg border border-gray-200 bg-white p-1 gap-1 w-fit" role="tablist" aria-label="Mode">
+          <button
+            role="tab"
+            aria-selected={mode === "weekly"}
+            data-testid="tab-weekly"
+            onClick={() => setMode("weekly")}
+            className={`rounded px-4 py-2 text-sm font-semibold transition-colors ${
+              mode === "weekly"
+                ? "bg-blue-600 text-white"
+                : "text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            Weekly Status
+          </button>
+          <button
+            role="tab"
+            aria-selected={mode === "sprint"}
+            data-testid="tab-sprint"
+            onClick={() => setMode("sprint")}
+            className={`rounded px-4 py-2 text-sm font-semibold transition-colors ${
+              mode === "sprint"
+                ? "bg-blue-600 text-white"
+                : "text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            Sprint Review
+          </button>
+        </div>
+
         {/* Cold state hero */}
         {!hasDigest && (
           <div className="mb-8 text-center">
@@ -249,8 +316,7 @@ export default function DigestApp() {
               Turn your tracker export into a weekly status — in seconds.
             </h1>
             <p className="mt-3 text-lg text-gray-500">
-              Drop a Jira, Linear, Asana, or GitHub CSV.{" "}
-              Get a Shipped / In Progress / Blocked digest ready to paste into Slack.
+              {coldSubtitle}
             </p>
           </div>
         )}
@@ -328,10 +394,10 @@ export default function DigestApp() {
           </div>
         )}
 
-        {/* Populated digest */}
+        {/* Populated view */}
         {hasDigest && parseResult && (
           <div>
-            {/* Top bar with file controls + group-by */}
+            {/* Top bar with file controls + group-by (only on weekly tab) */}
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-3">
                 <button
@@ -356,32 +422,36 @@ export default function DigestApp() {
                   Load sample data
                 </button>
               </div>
-              <div className="flex items-center gap-2 text-sm text-gray-500">
-                <span>Group by:</span>
-                <button
-                  onClick={() => setGroupMode("assignee")}
-                  className={`rounded px-2 py-1 font-medium ${
-                    groupMode === "assignee"
-                      ? "bg-blue-100 text-blue-700"
-                      : "text-gray-500 hover:text-gray-700"
-                  }`}
-                  aria-pressed={groupMode === "assignee"}
-                >
-                  Assignee
-                </button>
-                <span>&#9658;</span>
-                <button
-                  onClick={() => setGroupMode("epic")}
-                  className={`rounded px-2 py-1 font-medium ${
-                    groupMode === "epic"
-                      ? "bg-blue-100 text-blue-700"
-                      : "text-gray-500 hover:text-gray-700"
-                  }`}
-                  aria-pressed={groupMode === "epic"}
-                >
-                  Epic
-                </button>
-              </div>
+
+              {/* Group-by toggle: only visible on Weekly Status tab */}
+              {mode === "weekly" && (
+                <div className="flex items-center gap-2 text-sm text-gray-500">
+                  <span>Group by:</span>
+                  <button
+                    onClick={() => setGroupMode("assignee")}
+                    className={`rounded px-2 py-1 font-medium ${
+                      groupMode === "assignee"
+                        ? "bg-blue-100 text-blue-700"
+                        : "text-gray-500 hover:text-gray-700"
+                    }`}
+                    aria-pressed={groupMode === "assignee"}
+                  >
+                    Assignee
+                  </button>
+                  <span>&#9658;</span>
+                  <button
+                    onClick={() => setGroupMode("epic")}
+                    className={`rounded px-2 py-1 font-medium ${
+                      groupMode === "epic"
+                        ? "bg-blue-100 text-blue-700"
+                        : "text-gray-500 hover:text-gray-700"
+                    }`}
+                    aria-pressed={groupMode === "epic"}
+                  >
+                    Epic
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Fix 1: amber banner when any core column missing OR low confidence */}
@@ -414,17 +484,27 @@ export default function DigestApp() {
               />
             )}
 
-            <DigestView
-              rows={rows}
-              groupMode={groupMode}
-              weekFilter={weekFilter}
-              availableWeeks={availableWeeks}
-              onWeekFilterChange={setWeekFilter}
-              onBucketChange={handleRowBucketChange}
-              onTitleEdit={handleRowTitleEdit}
-              onRemapClick={() => setShowRemap(true)}
-              suppressSuccess={hasCoreMissing}
-            />
+            {/* Tab body */}
+            {mode === "weekly" ? (
+              <DigestView
+                rows={rows}
+                groupMode={groupMode}
+                weekFilter={weekFilter}
+                availableWeeks={availableWeeks}
+                onWeekFilterChange={setWeekFilter}
+                onBucketChange={handleRowBucketChange}
+                onTitleEdit={handleRowTitleEdit}
+                onRemapClick={() => setShowRemap(true)}
+                suppressSuccess={hasCoreMissing}
+              />
+            ) : (
+              <SprintReviewView
+                rows={rows}
+                hasSprintColumn={hasSprintColumn}
+                hasAddedColumn={hasAddedColumn}
+                onRemapClick={() => setShowRemap(true)}
+              />
+            )}
           </div>
         )}
       </div>

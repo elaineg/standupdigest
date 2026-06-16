@@ -1,0 +1,89 @@
+{
+  "app": "standupdigest",
+  "round": 1,
+  "url": "http://localhost:3210",
+  "source_roster": "lib/personas/roster.json (2026-06-12 ICP reorientation)",
+  "audience_definition": "IN-AUDIENCE = report COMPILER who builds a recurring team status from a tracker (PM, EM, data/ops analyst, team lead, founder-operator, marketing/demand-gen LEAD). NON-FIT = IC who writes only their own bullets, solo/freelance designer, anyone not compiling a recurring team status.",
+  "personas": [
+    {
+      "id": 1, "name": "Priya", "role": "Senior backend software engineer",
+      "tech": "high", "device": "desktop, large monitor, keyboard-first",
+      "stack": "terminal + neovim, GitHub, Kubernetes dashboards, Datadog, Linear, Slack",
+      "temperament": "skeptical of new tools; hates signups; will inspect network tab if suspicious; abandons anything slower than a CLI",
+      "audience": "NON-FIT",
+      "motivation": "Weak fit: as an IC she writes only her own standup bullets straight in Slack; she doesn't compile a team-wide weekly status from a tracker. She might glance at it if a manager shared it, but it solves no recurring job of hers — honest low motivation."
+    },
+    {
+      "id": 2, "name": "Marcus", "role": "Frontend engineer, 2 years in",
+      "tech": "high", "device": "desktop, Chrome with devtools open",
+      "stack": "VS Code, GitHub, Vercel, Figma dev mode, Storybook, Discord/Slack",
+      "temperament": "enthusiastic early adopter; shares tools in team Slack when impressed; notices janky CSS instantly",
+      "audience": "NON-FIT",
+      "motivation": "Weak fit as a report job: he reports up, not down — he doesn't aggregate a team status. But as an early adopter he might try it on a GitHub issues export out of curiosity and share it if it's slick. No recurring need of his own."
+    },
+    {
+      "id": 3, "name": "Wen", "role": "Marketing data analyst",
+      "tech": "high-medium", "device": "desktop, two monitors",
+      "stack": "BigQuery/SQL, Google Sheets, Looker Studio, dbt, GA4, Slack",
+      "temperament": "lives in data hygiene; distrusts tools that transform data invisibly; wants CSV in/out everywhere",
+      "audience": "IN-AUDIENCE",
+      "motivation": "Builds recurring stakeholder progress reports and lives in CSV. She'd drop a Jira/Asana export to auto-categorize work into a weekly status for marketing-ops stakeholders, but will scrutinize whether the tool silently mis-buckets rows."
+    },
+    {
+      "id": 4, "name": "Tomás", "role": "Operations analyst at a mid-size company",
+      "tech": "medium", "device": "corporate Windows laptop, Edge",
+      "stack": "Excel (power user), Tableau, Jira, Teams, SharePoint",
+      "temperament": "pragmatic; IT blocks installs so browser tools appeal; wary of pasting company data into random sites",
+      "audience": "IN-AUDIENCE",
+      "motivation": "Compiles weekly progress reports for stakeholders from Jira exports today by hand in Excel. A no-install, client-side tool that turns a Jira CSV into a Shipped/In-Progress/Blocked status is exactly his recurring chore — but he must trust nothing leaves the browser."
+    },
+    {
+      "id": 5, "name": "Dana", "role": "Demand-gen marketer",
+      "tech": "medium", "device": "MacBook in cafes; phone between meetings",
+      "stack": "HubSpot, GA4, Notion, Canva, LinkedIn Campaign Manager, Google Ads",
+      "temperament": "ruthless about time; if value isn't obvious in one scroll she's gone; screenshots tools she likes for the team channel",
+      "audience": "IN-AUDIENCE",
+      "motivation": "As a demand-gen lead she owes a weekly status on campaign/project progress and runs a small team in Asana. She'd use this to turn an Asana export into a stakeholder update — but only if the value lands in one scroll."
+    },
+    {
+      "id": 6, "name": "Jules", "role": "Content & community marketer",
+      "tech": "medium", "device": "50/50 desktop and mobile",
+      "stack": "Notion, Buffer, Mailchimp, Figma (consuming), X/LinkedIn/Mastodon, Discord",
+      "temperament": "posts constantly, juggles platform quirks daily; allergic to anything requiring a login for a small job",
+      "audience": "NON-FIT",
+      "motivation": "Weak fit: tracks content in Notion/Buffer, not a Jira/Linear issue tracker, and reports informally. No recurring CSV-export-to-status job. Might try it once but it doesn't map to her workflow."
+    },
+    {
+      "id": 7, "name": "Aisha", "role": "Product designer",
+      "tech": "medium-high", "device": "desktop, big display, trackpad",
+      "stack": "Figma, FigJam, Notion, Loom, Maze, Slack",
+      "temperament": "judges craft hard — spacing, copy tone, empty states; a clumsy UI loses her regardless of utility; advocates loudly for tools that feel considered",
+      "audience": "NON-FIT",
+      "motivation": "Borderline: she contributes to status but doesn't own a recurring team-wide tracker digest. Primarily she'll judge craft — empty states, copy tone, the digest layout — and advocate only if it feels considered, not from her own recurring need."
+    },
+    {
+      "id": 8, "name": "Rob", "role": "Brand/visual designer, freelance",
+      "tech": "medium", "device": "desktop, color-calibrated monitor",
+      "stack": "Figma, Illustrator, Photoshop, Google Drive, client Slacks/emails",
+      "temperament": "does repetitive asset-prep grunt work weekly; price-sensitive; compares everything to 'I could do this in Photoshop in 4 minutes'",
+      "audience": "NON-FIT",
+      "motivation": "No fit: a solo freelance designer has no team tracker and no weekly team-status report to compile. He'd never land here in his real workflow — honest zero motivation."
+    },
+    {
+      "id": 9, "name": "Elena", "role": "Engineering manager (8 reports)",
+      "tech": "medium-high but no time", "device": "laptop + phone, half the day in meetings",
+      "stack": "Google Calendar (wall-to-wall), Slack, Linear, Google Docs, Zoom, dashboards she skims",
+      "temperament": "30-second patience budget; uses tools between meetings on her phone; anything requiring setup is dead to her; recommends tools that save her reports time",
+      "audience": "IN-AUDIENCE",
+      "motivation": "Owes a weekly update on her 8 reports' progress and lives in Linear. Exporting a Linear CSV to instantly get a Shipped/In-Progress/Blocked digest grouped by assignee, carry-over flagged, would save her the worst part of her Friday — if it's truly 30 seconds."
+    },
+    {
+      "id": 10, "name": "Sam", "role": "Product manager",
+      "tech": "medium", "device": "mobile-heavy between meetings, laptop otherwise",
+      "stack": "Notion, Sheets, Slack, Zoom, Asana, Amplitude (skims), endless browser tabs",
+      "temperament": "synthesizes and shares constantly — exports, links, screenshots; values anything that makes him look organized; mild tech confidence, won't debug anything",
+      "audience": "IN-AUDIENCE",
+      "motivation": "Compiles a weekly stakeholder status from Asana every week and loves anything that makes him look organized. Dropping an Asana export to get a categorized, copy-to-Slack digest grouped by epic is squarely his recurring job — won't debug it though."
+    }
+  ]
+}
