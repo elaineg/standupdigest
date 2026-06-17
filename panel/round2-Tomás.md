@@ -1,49 +1,36 @@
-# Round 2 — Tomás (Ops analyst, Excel/Jira/Tableau, Edge, wary of pasting company data)
+# StandupDigest — Round 2 — Tomás (Ops analyst, Edge/Windows, wary of pasting company data)
 
-## Round-1 recap
-R1: ADVOCACY 8, Value=Yes, Clarity=Yes. Held at 8 by (a) couldn't trust categorization on MY
-messy real Jira export; (b) "Slipped / Reopened" merges two distinct events into one count.
-I did NOT cite the copy-bar overlap (that was others' complaint; I verified counts cleanly).
+## Prior blocker re-checked (R1: advocacy 8 — blocker to a 9 was custom statuses on a real messy export)
+RESOLVED. Loaded sample → it had an UNMAPPED "Needs Triage Review" with a "Move to…" control.
+I moved it to Blocked → BLOCKED went (2)→(3), the prose line updated to "3 blocked", and the
+unmapped section vanished. I then RELOADED the page and re-loaded the export: the rule STUCK.
+It read "All statuses recognized ✓" + "1 custom status remembered from last time ✓", and
+localStorage held `standupdigest-statusrules-…:{"Needs Triage Review":"Blocked"}` plus a
+"Saved on this device" note for column mapping. Teach the custom status once, then week two is
+drop-and-go. This is exactly the weekly-fiddling worry that capped me at 8 — gone.
+Also confirmed: copy bar is now anchored at the bottom (no overlap with rows), and "Share link"
+is a prominent primary button. Zero network POSTs on parse — privacy claim still holds.
 
-## Re-check of the panel fixes (Changes tab, sample data)
+## 1. CLARITY — Yes
+Hero "Turn your tracker export into a weekly status — in seconds" + "no upload, no signup" tells me
+what it is and that it's safe in <10s. Unchanged, strong.
 
-1. Copy-bar pinning — FIXED, and it was never my blocker but it's clean now. Pinned bottom-0,
-   floats over whitespace. Last row "Deprecate legacy API (Bob)" sits clearly ABOVE the bar,
-   no overlap. Verified desktop (1280px) AND mobile (375px) — same clean gap on both.
+## 2. VALUE — Yes
+Today this is my Friday Excel job (pivot by status, regroup by assignee, write the prose line). The
+app does it in one click AND now learns my workflow's custom statuses, so next Friday I just drop the
+new export. Copy Markdown gave me 734 chars of paste-ready digest. Clear time saver over my pivot.
 
-2. Prose summary completeness — FIXED. Now reads ALL nine non-zero categories:
-   "Since last week: 3 shipped, 1 started, 1 newly blocked, 1 unblocked, 2 slipped, 4 new,
-   1 still blocked, 2 carried over, 1 removed from tracker." No longer truncated to 4.
+## 3. ADVOCACY — 9  →  8→9 blocker CLOSED
+Persisted custom-status mapping is precisely what I needed to trust it on my real Jira export, so I'd
+now bring it up to my team unprompted. Not a 10 because: (a) the remembered rule is keyed per source
+but the sample's key showed as `…-unknown` — I'd want to confirm a real Jira CSV gets a stable
+per-tracker key so a Linear export can't inherit a Jira rule; (b) Slipped vs Reopened are still one
+bucket, which I'd hand-split for stakeholders. Minor, not blockers.
 
-3. COUNT HONESTY — verified clean, end to end. Prose header == section header counts == rows
-   shown == copied Markdown == copied plain text. The two collapsed sections (Carried over 2,
-   Still Blocked 1) expand correctly into the copied output with the exact bullet count their
-   header claims. Markdown and plaintext are content-identical. This is the thing I trust most.
+## New issue
+None material. Copy: clipboard populated (734 chars) but the button label didn't visibly flip to
+"Copied" in my automated read — copy verified functionally; clipboard label-flip likely test-env timing.
 
-4. Weekly Status tab — NO regression. "shipped 5, 4 in progress, 2 blocked, 1 carried over"
-   and the SHIPPED(5)/IN PROGRESS(4)/BLOCKED(2) rows match exactly. Group-by, week filter,
-   remap, copy all present and working.
-
-## My own held-back concerns — honest weigh-in
-- **Slipped / Reopened still merges two events into one count.** UNTOUCHED. A "slipped"
-  (rolled over, missed) and a "reopened" (was done, came back) are different stories I report
-  differently to stakeholders. Bucketing them together still forces me to manually split the
-  2 items. This was my real #2 and it stands.
-- **Trust on MY messy real export** — still can't prove it without uploading my own Jira CSV,
-  which the panel can't give me. BUT: the "never leaves your browser / no upload, no signup"
-  line + perfect count honesty on the sample lowers my risk to "I'd try it on a real export
-  next Monday." The remap-columns control suggests it'll handle non-standard headers. Lower
-  weight than R1 — count honesty earned that.
-
-## Verdict
-The fixes shipped what was promised and broke nothing. They didn't touch my two concerns, but
-one (trust) is partly bought down by demonstrated count honesty + the no-upload promise. The
-Slipped/Reopened merge is a genuine fidelity gap for stakeholder reporting and is what keeps me
-from a 9 — I'd still hand-edit those rows. I'm a strong 8: I'd recommend it to a fellow analyst
-unprompted, with the one caveat.
-
-ADVOCACY: 8/10  (R1 8 -> R2 8, held — not the copy bar; the Slipped/Reopened merge)
-VALUE: Yes (replaces ~30 min of hand-rolling a weekly status in Excel from a Jira export)
-CLARITY: Yes (hero + "no upload, no signup" tell me what it is and that it's safe in <30s)
-
-{"tester":"Tomás","round":2,"clarity":"Yes","value":"Yes","advocacy":8,"blockerResolved":true,"residual":"Slipped/Reopened still merges two distinct events into one count; real-messy-export trust unprovable without my own CSV (partly offset by verified count honesty + no-upload)"}
+```json
+{"tester": 1, "round": 2, "clarity": "Yes", "value": "Yes", "advocacy": 9, "topComplaints": ["Remembered rule keyed per source but sample showed source 'unknown' — want a stable per-tracker key so no cross-tracker bleed", "Slipped vs Reopened still merged into one bucket"], "priorConcernsAddressed": "all"}
+```

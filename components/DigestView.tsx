@@ -3,6 +3,8 @@
 import { useState, useCallback } from "react";
 import type { DigestRow, Bucket, GroupMode } from "@/lib/csvParser";
 import { buildMarkdown, buildPlainText, type DigestModel } from "@/lib/digestSerializer";
+import { ShareControl } from "@/components/ShareControl";
+import { buildWeeklySnapshot } from "@/lib/snapshotSerializer";
 
 export interface WeekOption {
   key: string; // "YYYY-Www" or "all"
@@ -19,6 +21,9 @@ interface DigestViewProps {
   onTitleEdit: (rowId: string, title: string) => void;
   onRemapClick: () => void;
   suppressSuccess?: boolean; // Fix 1: suppress "All statuses recognized ✓" when core col unmapped
+  onShareLinkCreated?: () => void; // Called when a share link is minted
+  // C(ii): count of statuses auto-applied from saved rules (for "remembered" indicator)
+  autoAppliedCount?: number;
 }
 
 const BUCKET_MOVE_OPTIONS: Bucket[] = [
@@ -366,7 +371,7 @@ function GroupedSection({
   );
 }
 
-// ---- Copy buttons (Fix 2: shared model, Fix 3: opaque bg) ----
+// ---- Copy buttons (Fix 2: shared model, Fix 3: opaque bg, A: non-overlapping static footer) ----
 
 function CopyButtons({ model }: { model: DigestModel }) {
   const [mdState, setMdState] = useState<"idle" | "copied">("idle");
@@ -384,6 +389,8 @@ function CopyButtons({ model }: { model: DigestModel }) {
         const ta = document.createElement("textarea");
         ta.value = text;
         ta.style.position = "fixed";
+        ta.style.top = "-9999px";
+        ta.style.left = "-9999px";
         ta.style.opacity = "0";
         document.body.appendChild(ta);
         ta.select();
@@ -396,8 +403,9 @@ function CopyButtons({ model }: { model: DigestModel }) {
   );
 
   return (
-    // Fix 3: solid bg-gray-50 (page bg) — opaque, no bleed-through; border-t for visual separation
-    <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-4 py-3 flex gap-3 z-10">
+    // A-fix: static footer (not sticky) — sits below all content, never overlaps rows.
+    // bg-white solid opaque; border-t for visual separation.
+    <div className="bg-white border-t border-gray-200 px-4 py-3 flex gap-3 rounded-b-2xl">
       <button
         aria-label="Copy as Markdown"
         onClick={() => copyText(buildMarkdown(model), setMdState)}
@@ -440,6 +448,8 @@ export function DigestView({
   onTitleEdit,
   onRemapClick,
   suppressSuccess = false,
+  onShareLinkCreated,
+  autoAppliedCount = 0,
 }: DigestViewProps) {
   // Fix 5: editable prose
   const [editedProse, setEditedProse] = useState<string | null>(null);
@@ -475,10 +485,17 @@ export function DigestView({
     groupMode,
   };
 
+  // Snapshot builder for share — captures current formatted digest
+  const getShareSnapshot = useCallback(
+    () => buildWeeklySnapshot(model, weekLabel),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [model, weekLabel]
+  );
+
   return (
-    // Fix 3: scroll-pb-20 ensures final rows are scrollable clear of the ~72px sticky bar
-    <div className="rounded-2xl border border-gray-200 bg-white shadow-sm" style={{ scrollPaddingBottom: "5rem" }}>
-      {/* Digest header: week selector (left) + Remap columns link (right) */}
+    // A-fix: no scrollPaddingBottom needed — copy bar is now a static footer, not sticky
+    <div className="rounded-2xl border border-gray-200 bg-white shadow-sm">
+      {/* Digest header: week selector (left) + Remap + Share (right) */}
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-100 px-6 py-3">
         {/* Fix 4: week selector */}
         <div className="flex items-center gap-2">
@@ -503,14 +520,26 @@ export function DigestView({
           </select>
         </div>
 
-        {/* Fix 1: persistent Remap columns button always visible */}
-        <button
-          onClick={onRemapClick}
-          className="text-xs font-medium text-blue-600 underline hover:text-blue-800"
-          data-testid="remap-columns-btn"
-        >
-          Remap columns
-        </button>
+        {/* Fix 1: persistent Remap columns button + Share link */}
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex flex-col items-end gap-0.5">
+            <button
+              onClick={onRemapClick}
+              className="text-xs font-medium text-blue-600 underline hover:text-blue-800"
+              data-testid="remap-columns-btn"
+            >
+              Remap columns
+            </button>
+            {/* C(i): surface persistence promise — visible near the remap entry point */}
+            <span className="text-xs text-gray-400" data-testid="saved-on-device-note">
+              Saved on this device — next week just drop your new export.
+            </span>
+          </div>
+          <ShareControl
+            getSnapshot={getShareSnapshot}
+            onLinkCreated={onShareLinkCreated}
+          />
+        </div>
       </div>
 
       {/* Editable prose summary (Fix 5) */}
@@ -568,9 +597,17 @@ export function DigestView({
           {unmapped.length === 0 ? (
             // Fix 1: suppress success when core column unmapped (suppressSuccess flag from DigestApp)
             suppressSuccess ? null : (
-              <p role="status" className="text-sm text-green-600 font-medium">
-                All statuses recognized ✓
-              </p>
+              <>
+                <p role="status" className="text-sm text-green-600 font-medium">
+                  All statuses recognized ✓
+                </p>
+                {/* C(ii): show remembered indicator when saved rules auto-applied */}
+                {autoAppliedCount > 0 && (
+                  <p className="mt-0.5 text-xs text-gray-400">
+                    {autoAppliedCount} custom {autoAppliedCount === 1 ? "status" : "statuses"} remembered from last time ✓
+                  </p>
+                )}
+              </>
             )
           ) : (
             <section aria-label="Unmapped statuses">

@@ -1,49 +1,38 @@
-# StandupDigest — Round 1 — Tomás (Ops Analyst, Edge/Windows, IN-AUDIENCE)
+# StandupDigest — Round 1 — Tomás (Ops analyst, Edge/Windows, wary of pasting company data)
 
-## Cold open (5s)
-Headline "Turn your tracker export into a weekly status — in seconds" + "Drop a Jira,
-Linear, Asana, or GitHub CSV" told me instantly what it is and that it speaks my stack.
-The line "Your file never leaves your browser — no upload, no signup" is the thing that
-made me stay — that is my #1 worry pasting Jira data into a random site. I'd stay.
+## 1. CLARITY — Yes
+Headline "Turn your tracker export into a weekly status — in seconds" + subline "Drop a Jira,
+Linear, Asana, or GitHub CSV. Get a Shipped / In Progress / Blocked digest" told me exactly
+what it does and that it's for me, inside 10 seconds. "Your file never leaves your browser —
+no upload, no signup" right under the drop zone hit my single biggest concern before I asked.
 
-## Q1 — First reaction / would I use it for real work?
-Yes. I hand-build a Shipped/In-Progress/Blocked roll-up from a Jira CSV in Excel every
-week — this is literally that chore. The NEW Changes tab ("Changes since last week") is
-better than what I do today: stakeholders constantly ask "what changed vs last week" and
-I currently diff two exports by eye. I found the Changes tab on my own (3rd pill in the
-tab row), hit "Load sample data", and it loaded BOTH current + prior week in one click and
-produced Newly Shipped / Newly Blocked / Slipped / New this period / Unblocked / Newly
-Started / Carried-over / Still Blocked / Removed-from-tracker. That's exactly my framing.
+## 2. VALUE — Yes
+Today I hand-build this in Excel every Friday from a Jira export: pivot by status, regroup by
+assignee, write the prose summary. This did all of it in one click. My own CSV (real Jira
+headers: Issue key / Summary / Status / Assignee / Epic Link) parsed with zero config —
+Done→Shipped, To Do→Backlog — and showed "All statuses recognized ✓". The auto-written prose
+summary ("shipped 5, 4 in progress, 2 blocked, 1 carried over") is the exact sentence I type by
+hand. Group-by-assignee/epic, carry-over flag, and an "Unmapped status" bucket are things my
+spreadsheet does NOT do for free. Genuine time saver.
 
-## Q2 — The ONE thing stopping me from advocating
-Nothing structural blocks it — it's genuinely close to a 9. What holds it at 8: I can't
-yet fully trust the CATEGORIZATION on MY messy real Jira export (custom statuses,
-"In Review", "Won't Do"). The sample is clean; my exports aren't. The "Remap columns"
-control exists, which is reassuring, but I'd need one real run on my own CSV before I'd
-push it to my team. Also "Slipped / Reopened" lumps two different events under one count —
-for a stakeholder I'd want to know which.
+## 3. ADVOCACY — 8
+I'd bring this up to my team. Holding it back from 9–10: I only proved it on a 4-row + sample
+CSV. I can't yet confirm it survives a real 400-row export with custom workflow statuses and
+commas-in-summaries. No deal-breaker, just "prove it on my real export before I rely on it."
 
-## Q3 — Trustworthy & copy-ready? — YES, verified
-I checked counts across four places and they ALL agree:
-- Prose summary: "3 shipped, 1 newly blocked, 2 slipped, 4 new."
-- On-screen section headers + actual visible rows (expanded the collapsed Carried-over &
-  Still-Blocked sections): 3/1/2/4/1unblocked/1started/2carried/1still-blocked/1removed.
-- Copied Markdown (799 chars) and Copied plaintext (772 chars): row counts identical to
-  screen, headers match, owners in parentheses preserved. No mismatch anywhere.
-- Markdown uses ## headers + "- " bullets; plaintext uses "• " bullets — both paste-ready
-  for Teams / a SharePoint status page. (Clipboard read worked in my env.)
-- Network check: ZERO off-origin requests when loading sample data — data stays local,
-  privacy claim holds. This is what earns my trust.
-Original "Weekly Status" tab still works: summary "shipped 5, in progress 4, blocked 2,
-1 carried over" matches its rows, group-by Assignee/Epic + week selector present.
-
-## Scores
-ADVOCACY: 8/10  (I'd bring it up to my ops peers; the missing point is needing one run on
-my own real Jira export + Slipped/Reopened being a merged bucket.)
-VALUE: Yes  (replaces a manual Excel diff I do weekly; saves real time, no install — passes
-IT, which blocks desktop tools.)
-CLARITY: Yes
+## 4. SHARE NOTES — passes my trust test, NOT a bait-and-switch
+- Sharing found easily ("Share link"). Clicking it opens a "What gets uploaded?" panel BEFORE
+  creating anything: UPLOADED = "only the formatted digest... summary line and categorized issue
+  titles, assignees, epics"; STAYS ON DEVICE = "your raw CSV, any Backlog/Todo and unmapped rows,
+  and your column mappings", plus red warning "Anyone with the link can view this... don't create
+  one for confidential data." Honest and reassuring.
+- I verified the actual upload payload: it contained ONLY Shipped/In-Progress/Blocked items — NO
+  backlog, NO unmapped rows, NO raw CSV. Disclosure is technically accurate, not spin. That turned
+  my suspicion into trust. Parsing my own CSV fired ZERO network POSTs — privacy claim holds.
+- Copy link confirmed: button changed to "Link copied ✓" and clipboard held the URL.
+- Shared view = clean read-only page labeled "Read-only shared digest", shows only the 3 status
+  buckets (backlog correctly absent). Renders well at 375px mobile.
 
 ```json
-{"tester": 1, "round": 1, "clarity": "Yes", "value": "Yes", "advocacy": 8, "topComplaints": ["Categorization unproven on my own messy Jira export (custom statuses); only tested on clean sample", "Slipped / Reopened merges two distinct events into one count — stakeholders would want them split"], "priorConcernsAddressed": "n/a"}
+{"tester": 1, "round": 1, "clarity": "Yes", "value": "Yes", "advocacy": 8, "topComplaints": ["Only proven on tiny/sample CSV — unverified on a real 400-row export with custom statuses and commas in summaries", "Single-week snapshot; want confidence at messy scale before recommending hard"], "priorConcernsAddressed": "n/a"}
 ```

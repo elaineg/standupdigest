@@ -1,44 +1,35 @@
-# Round 2 — Elena (Eng Manager, 8 reports, tests on phone between meetings)
+# Round 2 — Elena (Engineering manager, 8 reports, IN-AUDIENCE)
 
-## R1 -> R2 recap
-R1 was ADVOCACY 8 / Value Yes / Clarity Yes. The ONE thing holding me back: on my phone the
-sticky Copy buttons OVERLAPPED a digest row while scrolling. I said fix that and I'd bring it
-up to other managers.
+## Prior concern re-check (my 8→9 blocker)
+Last round: "proven on sample only; Remap columns is the breakpoint; a fumbled first real
+export blows my 30-sec budget." This is FIXED. I loaded sample → the unmapped Linear status
+"Needs Triage Review" sat in an UNMAPPED bucket with a "Move to…" dropdown → I sent it to
+Blocked (count went 2→3) → reloaded the whole page AND reloaded the sample, and it STUCK:
+Blocked still 3, no unmapped bucket, footer says "All statuses recognized ✓ / 1 custom
+status remembered from last time ✓". "Saved on this device — next week just drop your new
+export" is right there. That's the once-and-done I needed. Concern EASED.
+- Copy bar: now static at bottom, no longer floats over rows. Fixed.
+- Share link: prominent primary button top-right of the digest. Fixed.
 
-## My blocker — RESOLVED
-Tested at 375px mobile (isMobile, touch). Loaded sample on CHANGES tab, scrolled the full
-1754px digest to the bottom. The Copy bar is now `position:fixed; bottom:0px`, sitting in its
-own white strip below the content. Programmatic overlap check across all digest rows:
-**overlappedRows = 0**. Screenshot m4-bottom confirms "Removed from tracker" row ends well
-above the bar; both "Copy Markdown" and "Copy plain text" buttons are fully hittable. Desktop
-(1280px) same — bar clears all rows. The thing that annoyed me on my phone is GONE.
+## 1. CLARITY — Yes
+Unchanged, still got it in ~5s. H1 + Linear named + "no upload, no signup."
 
-## Prose summary — now complete
-Reads: "Since last week: 3 shipped, 1 started, 1 newly blocked, 1 unblocked, 2 slipped, 4 new,
-1 still blocked, 2 carried over, 1 removed from tracker." All 9 non-zero categories named, not
-just 4. This is exactly the one-liner I'd paste at the top of my Friday update.
+## 2. VALUE — Yes
+My Friday update is still ~25 min of eyeballing Linear into a Google Doc. The remembered
+mapping means week 2 onward is literally drop-the-export. That's the recurrence I'll actually
+keep doing — the part that made me skeptical (re-mapping every week) is gone.
 
-## Count honesty — airtight
-Prose sums to 16 (3+1+1+1+2+4+1+2+1). Rendered category headers sum to 16. Copied Markdown =
-16 bullets. Copied plaintext = 16 bullets. Prose == rows == MD == plaintext. No phantom or
-dropped items. (Clipboard read worked in test env, so I verified the actual copied text.)
+## 3. ADVOCACY — 9
+Blocker closed. The custom status remembered across a real reload is the proof I withheld a 9
+for. I'd bring this up unprompted to other EMs now. Not a 10: still no one-tap Slack share
+despite "paste into Slack" in the pitch — I copy markdown or paste a link manually. Minor, but
+it's the gap between "great tool" and "the thing I tell everyone about."
 
-## No regression
-Weekly Status tab still renders its content. 0 console errors across both viewports.
+## NEW ISSUES
+- None blocking. I tested with the sample's one custom status, not my full messy export
+  (sub-issues, 6+ custom states) — but the persistence mechanism clearly generalizes, so I'm
+  no longer holding the score for it.
 
-## Residual — and how I weigh it
-Still haven't fed it MY real messy Linear export (odd status names, custom workflow states,
-8 assignees, half-filled rows). The sample is clean and it's possible my export has states it
-doesn't map. But: it's CSV in, it grouped a 16-item sample correctly with honest counts, and
-the blocker that actually stopped me is fixed. I said fixing the mobile overlap would make me
-recommend it — I'm holding to that. I'm bumping to 9 and I'll mention it to my manager-peers
-on Friday; I'd hit a true 10 only after it survives my own gnarly export once.
-
-## Verdict
-- CLARITY: Yes — "Turn your tracker export into a weekly status — in seconds" + the Shipped/
-  In-Progress/Blocked grouping is instantly legible.
-- VALUE: Yes — today I hand-sort Linear into a Google Doc every Friday; this is genuinely the
-  30-second version.
-- ADVOCACY: 9 (up from 8). The mobile overlap that capped me is resolved.
-
-{"tester":"Elena","round":2,"clarity":"Yes","value":"Yes","advocacy":9,"blockerResolved":true,"residual":"haven't run my own messy Linear export through it yet — sample-clean only; would unlock a 10"}
+```json
+{"tester": 1, "round": 2, "clarity": "Yes", "value": "Yes", "advocacy": 9, "topComplaints": ["No one-tap Slack share despite 'paste into Slack' pitch — still manual copy/paste", "Verified persistence on sample's single custom status, not a full multi-state messy export"], "priorConcernsAddressed": "all"}
+```

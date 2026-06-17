@@ -1,63 +1,39 @@
-# StandupDigest — Round 1 — Aisha (Product designer, NON-FIT, judges craft hard)
+# Round 1 — Aisha (Product designer, NON-FIT, judges craft hard) — SHARE focus
 
-## Cold open (5s)
-Clear. Headline "Turn your tracker export into a weekly status — in seconds." + sub naming
-Jira/Linear/Asana/GitHub CSV and "paste into Slack" told me exactly what it is and who it's
-for. "Your file never leaves your browser — no upload, no signup" landed the trust hook. I'd stay.
+## 1. CLARITY — Yes
+Cold, in ~15s: "Drop a Jira/Linear/Asana/GitHub CSV, get a Shipped / In Progress / Blocked
+digest you paste into Slack." Headline + subhead name the inputs AND the output format, and
+"Your file never leaves your browser — no upload, no signup" sets trust immediately. Three
+tabs (Weekly Status / Sprint Review / Changes) are legible. Nothing made me squint.
 
-## The new "Changes" tab
-Discovered it as the 3rd tab; loaded BOTH samples in one click via "Load sample data".
+## 2. VALUE — Marginal (honest NON-FIT)
+Today the team update gets hand-assembled in Slack/Notion by whoever owns it — not me. As a
+designer I contribute lines, I don't own a recurring tracker digest, so I wouldn't open this
+weekly. For the owner, the categorization + assignee grouping + "carry-over" tag + unmapped-
+status catch-all is real time saved. Real value, just not for my role.
 
-### Craft — this is genuinely considered
-- Empty state is the best part: two labeled drop zones ("Current export (now)" /
-  "Compare to last week's export (optional)") + a centered explainer card with a bold
-  "See what changed since your last export." and a plain-language sub. A designer respects this.
-- Digest layout: color-coded dots per category (green shipped, red blocked, amber slipped,
-  blue new), assignee in muted parentheses, generous vertical rhythm. Low-noise categories
-  (Carried over / Still Blocked) are collapsed by default with ▸ disclosure — right call.
-- Category labels read like a human wrote them: "Slipped / Reopened", "New this period",
-  "Removed from tracker", "Unblocked". Tone is consistent and non-jargony.
-- Copy buttons are a sticky footer pinned to the card bottom (always reachable while you
-  scroll a long digest). NOTE: in a fullPage screenshot this stitches mid-list and looked
-  broken at first — verified in a real viewport it's a clean pinned bar. Copy verified
-  visually; not a regression.
+## 3. ADVOCACY — 7 (reported honestly; a 7 = falls short of "bring it up unprompted")
+Biggest thing holding it down: the in-app digest chrome is slightly clumsy where everything
+else is considered. "Share link" is a tiny blue text link at top-right, equal visual weight to
+"Remap columns" — the marquee output action is under-emphasized; and the "Copy Markdown / Copy
+plain text" bar floats/overlaps mid-digest (reads like a sticky-position artifact). Polish
+those two and I'd go 8–9. I won't inflate to recommend-unprompted for a tool outside my workflow.
 
-### Count integrity — PASSES
-Prose: "Since last week: 3 shipped, 1 newly blocked, 2 slipped, 4 new."
-Rendered rows: Shipped 3, Newly Blocked 1, Slipped 2, New 4 — every surfaced count matches
-the rows shown. Every header count (Unblocked 1, Newly Started 1, Still Blocked 1, Carried 2,
-Removed 1) matches its rendered rows too. Copied Markdown AND plaintext are row-for-row
-identical to the screen — no phantom or dropped items. Zero console errors.
-
-### Craft nits (not bugs)
-- The headline prose surfaces only 4 of 9 categories; a skimmer could miss that 1 was
-  unblocked / 1 removed / 1 still blocked. Defensible as a "headline", but a more considered
-  summary would say "+1 unblocked, 1 removed" rather than silently dropping them.
-
-## Weekly Status (regression check) — still works
-Summary "shipped 5, 4 in progress, 2 blocked, 1 carried over" matches SHIPPED(5)/IN PROGRESS(4)/
-BLOCKED(2). Bonus considered touch: "Unmapped status (1)" with a "Move to…" remap dropdown.
-
-## The three questions
-**Q1 — first reaction / use it for real work?** Reaction: tidy, trustworthy, clearly made by
-someone who cares about layout. But I'm a NON-FIT: I contribute to status, I don't own a
-recurring tracker→digest. So no, *I* wouldn't open this weekly — though I'd send it to a PM/EM
-who does. I'm judging craft, and the craft holds up.
-
-**Q2 — the ONE thing stopping me advocating?** It solves a problem I don't personally own, so
-my advocacy is second-hand. On craft alone the only real ding is the headline-summary dropping
-5 categories — fix that and the prose feels complete, not partial.
-
-**Q3 — trustworthy & copy-ready?** Yes. Counts match rows match clipboard, both Markdown and
-plaintext are clean and paste-ready for Slack/Notion. I'd trust pasting this without re-checking.
-
-## Scores
-- ADVOCACY: 7  (high craft, clean & trustworthy output — but I don't own this workflow, so
-  it's a hand-off recommendation, not an unprompted one; and the partial headline summary keeps
-  it off a 9)
-- VALUE: Marginal  (for ME — non-fit; the value is real but lands on PMs/EMs, not designers)
-- CLARITY: Yes
+## SHARE NOTES
+- Affordance: DISCOVERABLE but UNDER-WEIGHTED. "Share link" small blue text, visually identical
+  to "Remap columns" — not distinct enough for the most shareable action. It IS clearly separate
+  from the Copy buttons (those live at card bottom), so no confusion, just under-emphasis.
+- Disclosure copy: EXCELLENT tone. "What gets uploaded?" inset panel, two-column UPLOADED vs
+  "STAYS ON YOUR DEVICE — NEVER UPLOADED", then red "Anyone with the link can view this digest.
+  Don't create one for confidential data." Honest, specific, no legalese. Best-crafted moment.
+- Shared page desktop: clean, on-brand — eye-icon "Read-only shared digest" badge, color-coded
+  sections, tasteful "Made free with StandupDigest — no signup / Create your own digest" footer.
+  Backlog + unmapped rows correctly OMITTED, matching the disclosure promise — trust kept.
+- Shared page 375px: genuinely good — no overflow, badge wraps gracefully, footer stacks clean.
+- Copy-link confirmation: CONSIDERED. Two-step (Create link → readonly URL field + green
+  "Link copied ✓" button), and the subhead updates to "You've shared a read-only copy via link."
+  Clipboard verified: real short URL /s/QRZj… landed. Confirmation visible and reassuring.
 
 ```json
-{"tester": 1, "round": 1, "clarity": "Yes", "value": "Marginal", "advocacy": 7, "topComplaints": ["Headline prose summary surfaces only 4 of 9 change categories — silently drops unblocked/removed/still-blocked, reads as partial", "Sticky copy-bar stitches mid-list in fullPage capture (cosmetic/test-env only, fine in real viewport)", "Non-fit: I contribute to status but don't own a recurring tracker digest, so advocacy is second-hand"], "priorConcernsAddressed": "n/a"}
+{"tester": 1, "round": 1, "clarity": "Yes", "value": "Marginal", "advocacy": 7, "topComplaints": ["'Share link' entry point under-weighted — tiny text link at equal weight to 'Remap columns', not distinct enough for the marquee share action", "Copy Markdown/plain bar floats and overlaps mid-digest like a sticky-position artifact"], "priorConcernsAddressed": "n/a"}
 ```

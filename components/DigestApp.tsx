@@ -18,10 +18,13 @@ import {
 import { SprintReviewView } from "@/components/SprintReviewView";
 import { ChangesView } from "@/components/ChangesView";
 import { RemapPanel } from "@/components/RemapPanel";
+import { useShareLinkState } from "@/components/ShareControl";
 
 const LS_MAP_KEY = (source: string) => `standupdigest-colmap-${source}`;
 const LS_GROUP_KEY = "standupdigest-groupmode";
 const LS_MODE_KEY = "standupdigest-mode";
+// C(ii): custom status rules persisted per source — {status → bucket}
+const LS_STATUS_RULES_KEY = (source: string) => `standupdigest-statusrules-${source}`;
 
 type AppMode = "weekly" | "sprint" | "changes";
 
@@ -43,6 +46,41 @@ function saveMap(source: string, map: ColumnMap) {
   }
 }
 
+// C(ii): load/save custom status→bucket rules per source
+function loadStatusRules(source: string): Record<string, Bucket> {
+  try {
+    const raw = window.localStorage.getItem(LS_STATUS_RULES_KEY(source));
+    if (!raw) return {};
+    return JSON.parse(raw) as Record<string, Bucket>;
+  } catch {
+    return {};
+  }
+}
+
+function saveStatusRule(source: string, status: string, bucket: Bucket) {
+  try {
+    const existing = loadStatusRules(source);
+    existing[status] = bucket;
+    window.localStorage.setItem(LS_STATUS_RULES_KEY(source), JSON.stringify(existing));
+  } catch {
+    // ignore
+  }
+}
+
+// Apply saved status rules to rows: re-bucket any Unmapped row whose status has a saved rule
+function applyStatusRules(
+  rows: DigestRow[],
+  rules: Record<string, Bucket>
+): DigestRow[] {
+  if (Object.keys(rules).length === 0) return rows;
+  return rows.map((r) => {
+    if (r.bucket === "Unmapped" && rules[r.status]) {
+      return { ...r, bucket: rules[r.status] };
+    }
+    return r;
+  });
+}
+
 // Fix 1: determine if any core column failed to auto-detect
 function coreColumnsMissing(columnMap: ColumnMap): boolean {
   return !columnMap.title || !columnMap.status || !columnMap.assignee;
@@ -59,6 +97,8 @@ export default function DigestApp() {
   // Fix 4: week filter state
   const [weekFilter, setWeekFilter] = useState<string>("all");
   const [availableWeeks, setAvailableWeeks] = useState<WeekOption[]>([]);
+  // C(ii): count of rows auto-applied from saved status rules (for "remembered" indicator)
+  const [autoAppliedCount, setAutoAppliedCount] = useState<number>(0);
   // Tab mode: "weekly" (default) | "sprint" | "changes"
   const [mode, setMode] = useState<AppMode>("weekly");
   // Changes tab: prior-period rows (set by "Load sample data" on the Changes tab)
@@ -139,11 +179,20 @@ export default function DigestApp() {
           ? parseCSVText(text, effectiveOverride)
           : result;
 
+        // C(ii): apply saved custom status rules to auto-bucket previously remapped statuses
+        const statusRules = loadStatusRules(finalResult.source);
+        const rowsWithRules = applyStatusRules(finalResult.rows, statusRules);
+        // Count how many rows were auto-applied (were Unmapped before rules, not after)
+        const applied = finalResult.rows.filter(
+          (r, i) => r.bucket === "Unmapped" && rowsWithRules[i].bucket !== "Unmapped"
+        ).length;
+        setAutoAppliedCount(applied);
+
         setParseResult(finalResult);
-        setRows(finalResult.rows);
+        setRows(rowsWithRules);
 
         // Fix 4: compute available weeks and default to most recent
-        const weeks = computeWeekOptions(finalResult.rows);
+        const weeks = computeWeekOptions(rowsWithRules);
         setAvailableWeeks(weeks);
         // Default to most recent week (first option, if it's not "all")
         const defaultWeek = weeks.length > 1 ? weeks[0].key : "all";
@@ -196,6 +245,7 @@ export default function DigestApp() {
     setWeekFilter("all");
     setAvailableWeeks([]);
     setChangesPriorRows(null);
+    setAutoAppliedCount(0);
   }, []);
 
   const handleDrop = useCallback(
@@ -244,11 +294,16 @@ export default function DigestApp() {
 
   const handleRowBucketChange = useCallback(
     (rowId: string, newBucket: Bucket) => {
-      setRows((prev) =>
-        prev.map((r) => (r.id === rowId ? { ...r, bucket: newBucket } : r))
-      );
+      setRows((prev) => {
+        const target = prev.find((r) => r.id === rowId);
+        // C(ii): if this row was Unmapped, save the status→bucket rule so next export auto-maps it
+        if (target && target.bucket === "Unmapped" && parseResult) {
+          saveStatusRule(parseResult.source, target.status, newBucket);
+        }
+        return prev.map((r) => (r.id === rowId ? { ...r, bucket: newBucket } : r));
+      });
     },
-    []
+    [parseResult]
   );
 
   const handleRowTitleEdit = useCallback(
@@ -263,6 +318,10 @@ export default function DigestApp() {
   );
 
   const hasDigest = rows.length > 0;
+
+  // Share link state — tracks whether any link has been created this session
+  // so the privacy claim can become mode-aware once a link exists.
+  const [hasSharedLink, markSharedLink] = useShareLinkState();
 
   // Fix 1: show amber banner when any core column missing OR low confidence
   const showAmberBanner =
@@ -406,9 +465,17 @@ export default function DigestApp() {
               >
                 Load sample data
               </button>
-              <p className="text-center text-sm text-gray-400">
-                Your file never leaves your browser — no upload, no signup.
-              </p>
+              {/* Privacy claim: absolute/unqualified when no link exists; mode-aware after */}
+              {hasSharedLink ? (
+                <p className="text-center text-sm text-gray-400" data-testid="privacy-claim">
+                  Your CSV stays in your browser. You&apos;ve shared a read-only copy of
+                  this digest via link.
+                </p>
+              ) : (
+                <p className="text-center text-sm text-gray-400" data-testid="privacy-claim">
+                  Your file never leaves your browser — no upload, no signup.
+                </p>
+              )}
             </div>
           </div>
         )}
@@ -425,14 +492,23 @@ export default function DigestApp() {
 
         {/* Changes tab — always rendered (handles its own cold/populated state) */}
         {mode === "changes" && (
-          <ChangesView
-            currentRows={rows}
-            hasCurrentFile={hasDigest}
-            onLoadCurrentFile={handleFile}
-            externalPriorRows={changesPriorRows}
-            onRemapClick={() => setShowRemap(true)}
-            onLoadSampleChanges={handleLoadSampleChanges}
-          />
+          <>
+            {/* Privacy claim for Changes tab — mode-aware */}
+            <p className="mb-3 text-sm text-gray-400" data-testid="privacy-claim">
+              {hasSharedLink
+                ? "Your CSV stays in your browser. You've shared a read-only copy of this digest via link."
+                : "Your file never leaves your browser — no upload, no signup."}
+            </p>
+            <ChangesView
+              currentRows={rows}
+              hasCurrentFile={hasDigest}
+              onLoadCurrentFile={handleFile}
+              externalPriorRows={changesPriorRows}
+              onRemapClick={() => setShowRemap(true)}
+              onLoadSampleChanges={handleLoadSampleChanges}
+              onShareLinkCreated={markSharedLink}
+            />
+          </>
         )}
 
         {/* Remap panel (used by all tabs) */}
@@ -451,6 +527,13 @@ export default function DigestApp() {
         {/* Populated view — Weekly Status and Sprint Review tabs only */}
         {hasDigest && parseResult && mode !== "changes" && (
           <div>
+            {/* Privacy claim — mode-aware; must remain visible in populated state */}
+            <p className="mb-3 text-sm text-gray-400" data-testid="privacy-claim">
+              {hasSharedLink
+                ? "Your CSV stays in your browser. You've shared a read-only copy of this digest via link."
+                : "Your file never leaves your browser — no upload, no signup."}
+            </p>
+
             {/* Top bar with file controls + group-by (only on weekly tab) */}
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-3">
@@ -538,6 +621,8 @@ export default function DigestApp() {
                 onTitleEdit={handleRowTitleEdit}
                 onRemapClick={() => setShowRemap(true)}
                 suppressSuccess={hasCoreMissing}
+                onShareLinkCreated={markSharedLink}
+                autoAppliedCount={autoAppliedCount}
               />
             ) : (
               <SprintReviewView
@@ -545,6 +630,7 @@ export default function DigestApp() {
                 hasSprintColumn={hasSprintColumn}
                 hasAddedColumn={hasAddedColumn}
                 onRemapClick={() => setShowRemap(true)}
+                onShareLinkCreated={markSharedLink}
               />
             )}
           </div>

@@ -1,50 +1,41 @@
-# StandupDigest — Round 1 — Marcus (Frontend eng, 2yr; NON-FIT audience)
+# Round 1 — Marcus (Frontend eng, 2yr; NON-FIT — reports up, not down)
 
-## Cold open (5s reaction)
-H1: "Turn your tracker export into a weekly status — in seconds." Subtext names Jira/Linear/
-Asana/GitHub CSV, "ready to paste into Slack," "no upload, no signup." I get it instantly —
-CSV in, Slack-pasteable status out. Clean, no jank, no console errors. As an early adopter I'd
-stay and poke it. The "no signup, stays in your browser" line is the right flex.
+## 1. CLARITY — Yes
+H1 "Turn your tracker export into a weekly status — in seconds" + subline "Drop a Jira, Linear,
+Asana, or GitHub CSV. Get a Shipped / In Progress / Blocked digest ready to paste into Slack"
+told me exactly what it is in <10s. Drop zone, "Load sample data", and the "Jira · Linear ·
+Asana · GitHub Issues" line removed all doubt. One-sentence explainable. No console errors.
 
-## Did I find + use the Changes tab?
-Yes — three tabs, discovered "Changes" immediately. Its "Load sample data" loads BOTH current
-and prior-week in one click as promised. Output rendered with the full taxonomy: Newly Shipped,
-Newly Blocked, Slipped/Reopened, New this period, Unblocked, Newly Started, collapsible Carried-
-over + Still-blocked, and an italic "Removed from tracker" list. Nice touch: "[blocked 2+ wks]"
-tag on a still-blocked item.
+## 2. VALUE — No (for ME specifically)
+The tool is good, but I report UP to my lead, not down — I don't assemble a weekly team status.
+Today I just paste a couple PR links into Slack myself; this solves a job I don't have. For an
+EM/team lead it'd genuinely beat hand-typing a Friday update. As an early adopter I'd try it on a
+GitHub issues export out of curiosity, but no recurring need of my own.
 
-## Count / trust verification (the important part)
-Counts FULLY reconcile. Prose summary "Since last week: 3 shipped, 1 newly blocked, 2 slipped,
-4 new." matches every section header (Newly Shipped 3, Newly Blocked 1, Slipped 2, New 4) AND
-matches the copied Markdown exactly. I copied both formats and inspected:
-- Markdown copy: complete, well-formed, all 9 sections incl. "Removed from tracker (1)".
-- Plaintext copy (772 chars): also complete, includes Removed section, bullet style.
-No count mismatch anywhere. This is trustworthy — I'd paste it without re-checking. That earns
-real points; a digest tool that lies about counts is dead on arrival.
+## 3. ADVOCACY — 6
+I'd share it in our Slack once because it's slick and free with no signup — not unprompted or
+repeatedly, since it's not my workflow. SINGLE thing holding the number down (beyond fit): the
+floating "Copy Markdown / Copy plain text" bar is fixed/sticky and OVERLAPS the digest content —
+it sits on top of "Build analytics dashboard" mid-list in the main view. A frontend dev notices
+that instantly; reads as unfinished. Fix the z-index/scroll-margin and this is an 8.
 
-## Weekly Status regression check
-Original tab still works — sample loads, "shipped 5 / 4 in progress / 2 blocked / 1 carried"
-summary, group-by Assignee/Epic, week selector. No JS errors, no regression.
-
-## Q1 — First reaction + use it for my work?
-Slick and it works. But for MY job: I report UP to a lead, I don't aggregate a team's status,
-and I don't keep a Jira/Linear export handy. The "diff since last week" framing is genuinely the
-most interesting tab — I could imagine pointing it at a GitHub Issues export out of curiosity —
-but I have no recurring need. A team lead or EM is the real user, not me.
-
-## Q2 — The ONE thing stopping advocacy
-Nothing's broken — it's audience fit. I'd only forward it to my EM in Slack, not adopt it. Minor
-polish nit: the sticky Copy bar overlaps the digest rows mid-scroll on a tall result, which looks
-janky on first load (it IS position:sticky, so functional, just visually messy until you scroll).
-
-## Q3 — Output trustworthy + copy-ready?
-Yes. Counts match rows AND match both copied formats. Markdown pastes clean into Slack/Notion.
-This is the strongest part of the app.
-
-ADVOCACY: 6
-VALUE: Marginal  (no recurring need of my own; I report up, not down — real value is for a lead)
-CLARITY: Yes
+## 4. SHARE NOTES
+- Sharing FOUND + WORKED end-to-end: "Share link" → privacy disclosure → "Create link" produced
+  /s/RXqy7rSmC2AsarD2VjEqF5xI, which rendered a real read-only page.
+- Privacy story HONEST + clear, not contradictory: two columns "UPLOADED (only the formatted
+  digest…)" vs "STAYS ON YOUR DEVICE — NEVER UPLOADED (raw CSV, backlog/todo, unmapped rows,
+  column mappings)" + red "Anyone with the link can view this digest. Don't create one for
+  confidential data." After creating, copy correctly switches to "Your CSV stays in your browser.
+  You've shared a read-only copy…". Best privacy explanation I've seen in this category.
+- Copy-link confirmation VISIBLE: button flips to "Link copied ✓". (Clipboard read blocked in
+  test env — copy verified visually, not a regression.)
+- Mobile shared view at 375px: polished, NO horizontal overflow (scrollWidth==clientWidth),
+  color headers + carry-over tag preserved, read-only eye icon, clean "Create your own digest"
+  CTA + "Made free with StandupDigest — no signup" footer. No janky CSS on the shared page.
+- Only janky CSS anywhere = the overlapping fixed Copy bar in the main editor view.
 
 ```json
-{"tester": "Marcus", "round": 1, "clarity": "Yes", "value": "Marginal", "advocacy": 6, "topComplaints": ["No recurring need for me — I report up, not aggregate a team (audience non-fit)", "Sticky Copy bar visually overlaps digest rows mid-scroll on a tall result — looks janky on first load"], "priorConcernsAddressed": "n/a"}
+{"tester": 1, "round": 1, "clarity": "Yes", "value": "No", "advocacy": 6,
+ "topComplaints": ["Fixed Copy Markdown/plain-text bar overlaps digest content (z-index/scroll-margin)", "Not my workflow — I report up, not down; no recurring need"],
+ "priorConcernsAddressed": "n/a"}
 ```

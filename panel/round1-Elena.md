@@ -1,39 +1,34 @@
-# Round 1 — Elena (Eng Manager, 8 reports, IN-AUDIENCE)
+# Round 1 — Elena (Engineering manager, 8 reports, IN-AUDIENCE)
 
-Cold open on laptop, retested key flow on my real device (phone, 375px) since I use this between meetings.
+Cold open on laptop, share link judged at 375px (my VP opens it on their phone).
 
-## 30-second reaction
-Landing is instantly legible: "Turn your tracker export into a weekly status — in seconds." + "Drop a Jira, **Linear**, Asana, or GitHub CSV." Linear is named, "no upload, no signup" is right there. I'd stay. This is the thing I dread doing every Friday.
+## 1. CLARITY — Yes
+Got it in ~5s. H1 "Turn your tracker export into a weekly status — in seconds." + "Shipped /
+In Progress / Blocked digest ready to paste into Slack" + "Jira · Linear · Asana · GitHub."
+Linear is named, "no upload, no signup" is right there. No setup, no jargon. I'd stay.
 
-## Discovering + using the Changes tab
-Found the "Changes" tab unprompted (3rd pill, top). "Load sample data" loaded BOTH a current and prior-week CSV in one click — no second upload step, good. Header "Changes since last week" is exactly my skip-level's question phrased back to me.
+## 2. VALUE — Yes
+Today my Friday update = eyeballing Linear and hand-typing a per-person summary into a Google
+Doc (~25 min). The sample digest is exactly my artifact: grouped by assignee,
+Shipped/In-Progress/Blocked, one-line summary, carry-over flagged yellow, AND an "Unmapped
+Status" bucket so a custom Linear status doesn't silently vanish. That detail earns my trust.
 
-## Count verification (the thing I care most about)
-I copied the Markdown AND plaintext and inspected them against the rows on screen. Every count is honest end-to-end:
-- Newly Shipped 3 / Newly Blocked 1 / Slipped-Reopened 2 / New 4 / Unblocked 1 / Newly Started 1 / Still Blocked 1 / Carried over 2 / Removed 1 — header count = rows shown = copied rows, in ALL nine sections.
-- Prose summary "Since last week: 3 shipped, 1 newly blocked, 2 slipped, 4 new." matches the digest AND is byte-identical in the copied text.
-- NO count mismatch found. This is the trust bar for me and it cleared.
-- Markdown is clean `## Heading (n)` + `- item (Owner)`, pastes straight into a Google Doc or Slack. The "[blocked 2+ wks]" tag on Still Blocked is a genuinely useful carry-over flag.
+## 3. ADVOCACY — 8
+I'd bring this up to other EMs. Holding it back from 9: I only proved it on the SAMPLE.
+"Remap columns" is where these tools usually choke, and a fumbled first real Linear export
+would blow my 30-second budget. One clean run on my own messy CSV and this is a 9.
 
-## Weekly Status tab (regression check)
-Still works. Groups by Assignee (my mental model), shows carry-over flag, and — nice — surfaces an "UNMAPPED STATUS" item ("Needs Triage Review") with a manual Move-to control. That's the right call for Linear teams with custom statuses; builds my trust instead of silently dropping the row.
-
-## Q1 — First reaction / would I use it for real work?
-Yes. "What changed since last week on my team" is the exact question my skip-level asks, and this turns a Linear CSV into that answer with one click. The Shipped/Blocked/Slipped framing is how I already think. I'd use this Friday.
-
-## Q2 — The ONE thing stopping me from advocating
-I haven't fed it MY real Linear export yet — I only trust the sample. My Linear CSV has custom statuses, sub-issues, and 8 people's noise. The Weekly tab's "Remap columns" + "Unmapped status" handling makes me *believe* it'll cope, but until I drop my own messy export and it doesn't choke or miscount, I'm at "promising," not "I bring it up unprompted." Closely behind: on phone the Copy buttons are sticky and overlap a digest row while scrolling (cosmetic, not a blocker).
-
-## Q3 — Trustworthy and copy-ready?
-Yes. Counts are internally consistent and match the copied output exactly; Markdown drops cleanly into Slack/Docs. (Clipboard read worked in my test env with permissions granted.) Copy-ready for where it needs to go.
-
----
-ADVOCACY: 8/10
-VALUE: Yes
-CLARITY: Yes
-
-What holds it back from 9: needs to survive MY real, messy Linear export — sample data is honest but not proof for my team yet. Fix the sticky-button overlap on mobile and I'd happily bring it up to other managers.
+## SHARE NOTES
+- Found + worked fast: "Share link" obvious; link created in ~3s → /s/<id>.
+- Privacy note EXCELLENT: two-column "UPLOADED (formatted digest only) vs STAYS ON YOUR DEVICE
+  (raw CSV, backlog, mappings)" + red "Anyone with the link can view this; don't use for
+  confidential data." That's exactly the clarity I need before sending my VP a link.
+- Copy confirmation visible: button flips "Copy link" → "Link copied ✓". (Clipboard READ
+  blocked in my headless test env — copy verified visually, not a regression.)
+- Mobile shared view at 375px: glanceable, NOT a mess. Single column, color-coded sections,
+  assignee on every item, carry-over inline, no horizontal scroll. "Read-only shared digest"
+  header sets expectations; "Create your own digest" footer is a smart hook. VP reads it in one glance.
 
 ```json
-{"tester": 1, "round": 1, "clarity": "Yes", "value": "Yes", "advocacy": 8, "topComplaints": ["Only trusted the sample; haven't proven it on my own messy Linear export (custom statuses, sub-issues)", "On phone the sticky Copy Markdown/plain-text buttons overlap a digest row while scrolling"], "priorConcernsAddressed": "n/a"}
+{"tester": 1, "round": 1, "clarity": "Yes", "value": "Yes", "advocacy": 8, "topComplaints": ["Only proved it on the sample — haven't survived my own messy Linear export (custom statuses, sub-issues); Remap columns is the usual breakpoint", "Pitch says 'paste into Slack' but there's no one-tap Slack share — I'd still copy markdown or paste a link manually"], "priorConcernsAddressed": "n/a"}
 ```

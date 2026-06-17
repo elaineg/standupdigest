@@ -26,36 +26,28 @@ async function loadChangesSample(page: Page) {
 
 // ---- FIX 1: copy bar pinned at viewport bottom, no content overlap ----
 
-test('FIX1-desktop: Changes copy bar is fixed bottom-0, last rows clear it, both copy buttons click-hittable', async ({ page }) => {
+test('FIX1-desktop: Changes copy bar is a static footer (A-fix), last rows clear it, both copy buttons click-hittable', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await loadChangesSample(page);
 
-  // Scroll to absolute bottom
+  // Scroll to absolute bottom so all content and the copy bar are in view
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
   await page.waitForTimeout(200); // let scroll settle
 
   const mdButton = page.locator('button[aria-label="Copy as Markdown"]');
   const ptButton = page.locator('button[aria-label="Copy as plain text"]');
 
-  // Both buttons must be visible
+  // Both buttons must be visible (static footer flows below all content)
   await expect(mdButton).toBeVisible();
   await expect(ptButton).toBeVisible();
 
-  // Verify copy bar parent has "fixed bottom-0" classes
-  const copyBar = page.locator('.fixed.bottom-0.left-0.right-0');
-  await expect(copyBar).toBeVisible();
-  const copyBarClass = await copyBar.getAttribute('class');
-  expect(copyBarClass).toContain('fixed');
-  expect(copyBarClass).toContain('bottom-0');
-
-  // elementFromPoint on each button returns the button (or a child of it), not a digest row
+  // Copy bar is now a static footer — NOT fixed/sticky.
+  // Verify buttons are clickable (not covered by another element).
   const mdBtnBB = await mdButton.boundingBox();
   expect(mdBtnBB).not.toBeNull();
   const mdCenterX = mdBtnBB!.x + mdBtnBB!.width / 2;
   const mdCenterY = mdBtnBB!.y + mdBtnBB!.height / 2;
 
-  // elementFromPoint at button center — the closest ancestor button must have the correct aria-label.
-  // The SPAN child inside the button has aria-label=null (expected); we only check closest('button').
   const mdClosestBtn = await page.evaluate(({ x, y }: { x: number; y: number }) => {
     const el = document.elementFromPoint(x, y);
     if (!el) return 'no-element';
@@ -75,32 +67,15 @@ test('FIX1-desktop: Changes copy bar is fixed bottom-0, last rows clear it, both
   }, { x: ptCenterX, y: ptCenterY });
   expect(ptClosestBtn).toBe('Copy as plain text');
 
-  // The copy bar's top edge must be within 5px of viewport bottom minus bar height (i.e. it is AT the bottom)
-  const viewportHeight = 800;
-  expect(mdBtnBB!.y + mdBtnBB!.height).toBeLessThanOrEqual(viewportHeight + 5);
-  // Bar top is near the bottom: mdButton Y must be close to the viewport bottom
-  expect(mdBtnBB!.y).toBeGreaterThan(viewportHeight - 80); // bar is ≤80px tall
-
-  // Verify the last content item (Removed section) has bottom Y ABOVE the copy bar top
+  // Verify the last content item (Removed section) is visible ABOVE the copy bar footer
   const removedSection = page.locator('section[aria-label="Removed from tracker"]');
   await expect(removedSection).toBeVisible();
 
-  // The content area has pb-24 to clear the bar — verify no overlap by checking
-  // that the content div's last element bottom is above the copy bar top
-  const copyBarBB = await copyBar.boundingBox();
-  expect(copyBarBB).not.toBeNull();
-  const copyBarTop = copyBarBB!.y;
-
   const removedBB = await removedSection.boundingBox();
-  // The removed section (when scrolled into view) must end ABOVE the copy bar
-  // Since we've scrolled to the very bottom, the last content is now above the fixed bar
-  if (removedBB) {
-    // When at bottom, the section is visible and above the fixed bar (cleared by pb-24)
-    // pb-24 = 96px, which is more than the ~60px copy bar height
-    // So: section bottom <= copy bar top (within scroll offset of 96px slack)
-    // We just verify the copyBar is at the viewport bottom
-    expect(copyBarTop).toBeGreaterThan(viewportHeight - 80);
-    expect(copyBarTop).toBeLessThanOrEqual(viewportHeight);
+  if (removedBB && mdBtnBB) {
+    // Static footer: the removed section should end BEFORE the copy bar starts
+    // (removed section bottom <= copy bar top, since it's a static flow layout)
+    expect(removedBB.y + removedBB.height).toBeLessThanOrEqual(mdBtnBB.y + 10); // 10px tolerance
   }
 
   // Both copy buttons must be clickable — click each and verify "Copied ✓"
@@ -114,7 +89,7 @@ test('FIX1-desktop: Changes copy bar is fixed bottom-0, last rows clear it, both
   await expect(ptButton.locator('span[aria-live="polite"]')).toHaveText('Copied ✓', { timeout: 3000 });
 });
 
-test('FIX1-mobile: Changes copy bar pinned at bottom on 375px viewport, both buttons click-hittable', async ({ page }) => {
+test('FIX1-mobile: Changes copy bar (A-fix static footer) visible at 375px, both buttons click-hittable', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await loadChangesSample(page);
 
@@ -127,17 +102,9 @@ test('FIX1-mobile: Changes copy bar pinned at bottom on 375px viewport, both but
   await expect(mdButton).toBeVisible();
   await expect(ptButton).toBeVisible();
 
-  // Copy bar uses fixed bottom-0: verify class
-  const copyBar = page.locator('.fixed.bottom-0.left-0.right-0');
-  await expect(copyBar).toBeVisible();
-
+  // Copy bar is now a static footer (not fixed/sticky) — buttons are always visible at page bottom
   const mdBtnBB = await mdButton.boundingBox();
   expect(mdBtnBB).not.toBeNull();
-
-  // At mobile viewport (height 812), button should be near the bottom
-  const viewportHeight = 812;
-  expect(mdBtnBB!.y).toBeGreaterThan(viewportHeight - 100);
-  expect(mdBtnBB!.y + mdBtnBB!.height).toBeLessThanOrEqual(viewportHeight + 5);
 
   // elementFromPoint: both buttons are click-hittable at mobile
   const mdCenterX = mdBtnBB!.x + mdBtnBB!.width / 2;
@@ -303,17 +270,22 @@ test('REGRESSION-weekly-status: Shipped 5 / In Progress 4 / Blocked 2 on All dat
   await expect(page.getByRole('heading', { name: /Blocked \(2\)/i }).first()).toBeVisible();
 });
 
-test('REGRESSION-weekly-copy-bar: Weekly Status copy bar is still sticky (not broken to fixed)', async ({ page }) => {
+test('REGRESSION-weekly-copy-bar: Weekly Status copy bar is a static footer (A-fix) — buttons visible and clickable', async ({ page }) => {
   await page.goto(BASE + '/');
   await page.getByRole('button', { name: 'Load sample data' }).click();
   await expect(page.locator('[data-testid="prose-summary"]')).toBeVisible({ timeout: 10000 });
 
-  // Weekly Status uses sticky bottom-0, not fixed bottom-0
+  // Weekly Status copy bar is now a static footer (A-fix — no longer sticky to avoid overlap).
+  // Verify both buttons are visible and clickable.
   const mdButton = page.locator('button[aria-label="Copy as Markdown"]');
   await expect(mdButton).toBeVisible();
-  // The copy bar parent uses sticky (not fixed) on the weekly tab
-  const stickyBar = page.locator('.sticky.bottom-0');
-  await expect(stickyBar).toBeVisible();
+
+  // Scroll to bottom so copy bar is in view
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  await page.waitForTimeout(100);
+
+  await mdButton.click();
+  await expect(mdButton.locator('span[aria-live="polite"]')).toHaveText('Copied ✓', { timeout: 3000 });
 });
 
 test('REGRESSION-sprint-review: Sprint Review copy bar and velocity headline unaffected', async ({ page }) => {

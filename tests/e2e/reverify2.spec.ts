@@ -264,20 +264,16 @@ test('RV2-count-honesty-plaintext: plaintext copy has Slipped (1) and Reopened (
 
 // ---- 5. Previous fixes regression guard ----
 
-test('RV2-regression-copy-bar: Changes copy bar is fixed bottom-0 at desktop (no overlap)', async ({ page }) => {
+test('RV2-regression-copy-bar: Changes copy bar is static footer (A-fix) at desktop, buttons click-hittable', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await loadChangesSample(page);
 
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
   await page.waitForTimeout(200);
 
-  const copyBar = page.locator('.fixed.bottom-0.left-0.right-0');
-  await expect(copyBar).toBeVisible();
-  const copyBarClass = await copyBar.getAttribute('class');
-  expect(copyBarClass).toContain('fixed');
-  expect(copyBarClass).toContain('bottom-0');
-
+  // Copy bar is now a static footer (A-fix: no fixed/sticky to prevent mid-list overlap).
   const mdButton = page.locator('button[aria-label="Copy as Markdown"]');
+  await expect(mdButton).toBeVisible();
   await mdButton.click();
   await expect(mdButton.locator('span[aria-live="polite"]')).toHaveText('Copied ✓', { timeout: 3000 });
 });

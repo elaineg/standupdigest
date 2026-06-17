@@ -9,12 +9,15 @@ import {
   buildSprintPlainText,
   type SprintReviewCopyModel,
 } from "@/lib/sprintReview";
+import { ShareControl } from "@/components/ShareControl";
+import { buildSprintSnapshot } from "@/lib/snapshotSerializer";
 
 interface SprintReviewViewProps {
   rows: DigestRow[];
   hasSprintColumn: boolean;
   hasAddedColumn: boolean;
   onRemapClick: () => void;
+  onShareLinkCreated?: () => void;
 }
 
 // ---- Editable line (reuses the same pattern as DigestView) ----
@@ -193,6 +196,7 @@ export function SprintReviewView({
   hasSprintColumn,
   hasAddedColumn,
   onRemapClick,
+  onShareLinkCreated,
 }: SprintReviewViewProps) {
   const sprintNames = useMemo(() => getSprintNames(rows), [rows]);
   const [selectedSprint, setSelectedSprint] = useState<string>(sprintNames[0] ?? "");
@@ -259,6 +263,13 @@ export function SprintReviewView({
 
   const noSprintData = sprintNames.length === 0;
 
+  // Snapshot builder for share
+  const getShareSnapshot = useCallback(
+    () => buildSprintSnapshot(copyModel),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [copyModel]
+  );
+
   return (
     <div className="rounded-2xl border border-gray-200 bg-white shadow-sm" style={{ scrollPaddingBottom: "5rem" }}>
       {/* Header: sprint selector (left) + Remap columns (right) */}
@@ -283,13 +294,19 @@ export function SprintReviewView({
             </select>
           )}
         </div>
-        <button
-          onClick={onRemapClick}
-          className="text-xs font-medium text-blue-600 underline hover:text-blue-800"
-          data-testid="sprint-remap-columns-btn"
-        >
-          Remap columns
-        </button>
+        <div className="flex items-center gap-3 flex-wrap">
+          <button
+            onClick={onRemapClick}
+            className="text-xs font-medium text-blue-600 underline hover:text-blue-800"
+            data-testid="sprint-remap-columns-btn"
+          >
+            Remap columns
+          </button>
+          <ShareControl
+            getSnapshot={getShareSnapshot}
+            onLinkCreated={onShareLinkCreated}
+          />
+        </div>
       </div>
 
       {noSprintData && (

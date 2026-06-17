@@ -1,50 +1,34 @@
 # StandupDigest — Round 1 — Dana (Demand-gen marketer, IN-AUDIENCE)
 
-5-sec reaction: "Turn your tracker export into a weekly status — in seconds" + "Drop a Jira,
-Linear, Asana, or GitHub CSV." It names Asana, names the output (Shipped/In Progress/Blocked),
-says no upload/no signup. That's my exact weekly chore. I stayed.
+**1. CLARITY: Yes.** One scroll told me everything: "Turn your tracker export into a weekly
+status — in seconds. Drop a Jira, Linear, Asana, or GitHub CSV. Get a Shipped / In Progress /
+Blocked digest ready to paste into Slack." Asana is named, the output is named, and "Your file
+never leaves your browser — no upload, no signup" killed my usual hesitation. I'd explain it in
+one sentence to my team channel.
 
-## Discovering the Changes tab
-Found "Changes" as the 3rd tab unprompted. Clicked it → "Changes since last week" with an
-optional last-week dropzone and a "Load sample data" button that loads BOTH current + prior
-in one click. Worked first try, no errors.
+**2. VALUE: Yes.** Today I hand-write my weekly stakeholder update by skimming an Asana export
+into a Notion doc — 20+ min of copy/paste and categorizing. The sample digest auto-grouped into
+Shipped/In Progress/Blocked by assignee, gave a ready summary line ("shipped 5, 4 in progress,
+2 blocked, 1 carried over"), flagged carry-overs, and caught an UNMAPPED status with a one-click
+"Move to..." fixer. Copy Markdown / Copy plain text = paste straight into Slack/Notion. Real
+time save, not a re-entry tax.
 
-## Trust check (the part that matters to me)
-Prose summary: "Since last week: 3 shipped, 1 newly blocked, 2 slipped, 4 new."
-On-screen section headers: NEWLY SHIPPED (3), NEWLY BLOCKED (1), SLIPPED/REOPENED (2),
-NEW THIS PERIOD (4) — ALL MATCH the prose. Every header count = number of rows shown.
-Copied Markdown AND plaintext: counts and rows identical to the screen, owners in parens,
-"[blocked 2+ wks]" flag preserved, Removed-from-tracker list present. No mismatch anywhere.
-This is the first status tool I've trusted on counts without re-counting by hand.
-(Copy verified via clipboard read; sticky copy bar pinned to bottom of viewport — the
-mid-page overlap I first saw was only a full-page-screenshot artifact, not a real bug.)
+**3. ADVOCACY: 8.** I'd screenshot this to my team channel today. Holding it back from 9: I
+haven't proven it on MY messy real Asana export cold. "Remap columns" exists (reassuring), but
+the sample is idealized — I can't be sure my custom statuses map without fiddling. That's the
+gap between "looks great" and "I rely on it weekly."
 
-## Original Weekly Status tab
-Still works. Group-by Assignee, week picker, SHIPPED(5)/IN PROGRESS(4)/BLOCKED(2) all match
-its own prose line. No regression.
-
-## Q1 — First reaction / would I use it for real work?
-Yes. A "what changed since last week" digest is exactly the framing stakeholders want — they
-don't want the full board, they want movement. Newly Shipped / Newly Blocked / Slipped is the
-narrative I currently hand-type. I'd paste the plaintext straight into our exec Notion update.
-
-## Q2 — The ONE thing stopping me from advocating harder
-Value lands one scroll too low. The Changes tab opens with the dropzone + "Load sample data"
-filling the whole first screen, so the digest summary line — the payoff — sits right at the
-fold and I scroll past the uploader every single time after the first use. Once I've loaded a
-file, push the summary to the top. Secondary: I have to export TWO Asana CSVs (this week +
-last week) myself to use it for real; if it remembered last week's export locally so I only
-drop the current one, that's the magic-moment upgrade.
-
-## Q3 — Trustworthy and copy-ready?
-Yes. Counts are internally consistent screen-vs-copy, both Markdown and plaintext are clean
-and paste-ready (Notion/Slack), owner attribution intact. I'd ship it to stakeholders as-is.
-
-ADVOCACY: 8/10  (would screenshot it for the team channel; -2 because I still hand-export two
-CSVs and the summary buries under the uploader on repeat use)
-VALUE: Yes
-CLARITY: Yes
+**4. SHARE NOTES — all passed.**
+- Found + worked: "Share link" -> "What gets uploaded?" panel -> "Create link" made a `/s/...` URL.
+- Mobile shared view at 375px: clean, color-coded Shipped/In Progress/Blocked, assignees +
+  carry-over flag preserved, labeled "Read-only shared digest," "Create your own digest" CTA at
+  bottom. Stakeholders could read it on a phone instantly. Glanceable: yes.
+- Privacy note: clear + honest — UPLOADED (formatted digest only) vs STAYS ON YOUR DEVICE (raw
+  CSV, backlog, mappings) columns + red warning "Anyone with the link can view this digest.
+  Don't create one for confidential data." Exactly what I need before sharing externally.
+- Copy-link confirmation: visible — button flips to "Link copied ✓" and clipboard verified to
+  hold the URL.
 
 ```json
-{"tester": 1, "round": 1, "clarity": "Yes", "value": "Yes", "advocacy": 8, "topComplaints": ["Changes-tab summary sits below the dropzone — payoff buried one scroll down on repeat use", "Still must export TWO Asana CSVs by hand; no local memory of last week's export"], "priorConcernsAddressed": "n/a"}
+{"tester": 1, "round": 1, "clarity": "Yes", "value": "Yes", "advocacy": 8, "topComplaints": ["Can't trust it on my real messy Asana export cold — sample is idealized; unsure custom statuses map without fiddling Remap columns", "Shared link is read-only with no revoke/expiry control once 'anyone with the link can view'"], "priorConcernsAddressed": "n/a"}
 ```

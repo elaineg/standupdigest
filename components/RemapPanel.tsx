@@ -70,9 +70,13 @@ export function RemapPanel({
   lowConfidence,
 }: RemapPanelProps) {
   const [draft, setDraft] = useState<ColumnMap>({ ...currentMap });
+  const [saved, setSaved] = useState(false);
 
   const handleApply = () => {
     onApply(draft);
+    setSaved(true);
+    // Close after brief confirmation
+    setTimeout(() => setSaved(false), 2000);
   };
 
   const setField = (key: keyof ColumnMap, val: string) =>
@@ -133,7 +137,7 @@ export function RemapPanel({
         </div>
       </div>
 
-      <div className="mt-4 flex gap-3">
+      <div className="mt-4 flex flex-wrap items-center gap-3">
         <button
           onClick={handleApply}
           className="rounded-lg bg-amber-700 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-800 focus:outline-none focus:ring-2 focus:ring-amber-500"
@@ -146,7 +150,19 @@ export function RemapPanel({
         >
           Cancel
         </button>
+        {/* C(i): persistence confirmation — surfaces the saved-on-device promise */}
+        {saved && (
+          <p role="status" className="text-xs text-green-700 font-medium">
+            Saved on this device — next week just drop your new export.
+          </p>
+        )}
       </div>
+      {/* C(i): always-visible persistence note (not just after apply) */}
+      {!lowConfidence && (
+        <p className="mt-2 text-xs text-gray-500">
+          Your column mapping is saved on this device per tracker — next week just drop your new export.
+        </p>
+      )}
     </div>
   );
 }

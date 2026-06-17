@@ -11,6 +11,8 @@ import {
   type ChangesRow,
   type ChangesCopyModel,
 } from "@/lib/changesDigest";
+import { ShareControl } from "@/components/ShareControl";
+import { buildChangesSnapshot } from "@/lib/snapshotSerializer";
 
 // ---- Editable inline line (mirrors DigestView/SprintReviewView pattern) ----
 
@@ -266,8 +268,8 @@ function ChangesCopyButtons({ copyModel }: { copyModel: ChangesCopyModel }) {
   );
 
   return (
-    /* Fixed to viewport bottom — guarantees no mid-list wedge regardless of card height */
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-gray-50 border-t border-gray-200 px-4 py-3 flex gap-3">
+    /* A-fix: static footer — no fixed/sticky so it never floats over digest rows */
+    <div className="bg-white border-t border-gray-200 px-4 py-3 flex gap-3 rounded-b-2xl">
       <button
         aria-label="Copy as Markdown"
         onClick={() => copyText(buildChangesMarkdown(copyModel), setMdState)}
@@ -358,6 +360,7 @@ export interface ChangesViewProps {
   externalPriorRows?: DigestRow[] | null;
   onRemapClick: () => void;
   onLoadSampleChanges: () => void;
+  onShareLinkCreated?: () => void;
 }
 
 export function ChangesView({
@@ -367,6 +370,7 @@ export function ChangesView({
   externalPriorRows,
   onRemapClick,
   onLoadSampleChanges,
+  onShareLinkCreated,
 }: ChangesViewProps) {
   // Internal prior rows (from dropzone) — overridden by externalPriorRows when set
   const [internalPriorRows, setInternalPriorRows] = useState<DigestRow[] | null>(null);
@@ -442,21 +446,36 @@ export function ChangesView({
       }
     : null;
 
+  // Snapshot builder for share
+  const getShareSnapshot = useCallback(
+    () => buildChangesSnapshot(copyModel!),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [copyModel]
+  );
+
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white shadow-sm" style={{ scrollPaddingBottom: "5rem" }}>
+    <div className="rounded-2xl border border-gray-200 bg-white shadow-sm">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-100 px-6 py-3">
         <span className="text-sm font-semibold text-gray-700">Changes since last week</span>
-        <button
-          onClick={onRemapClick}
-          className="text-xs font-medium text-blue-600 underline hover:text-blue-800"
-          data-testid="changes-remap-columns-btn"
-        >
-          Remap columns
-        </button>
+        <div className="flex items-center gap-3 flex-wrap">
+          <button
+            onClick={onRemapClick}
+            className="text-xs font-medium text-blue-600 underline hover:text-blue-800"
+            data-testid="changes-remap-columns-btn"
+          >
+            Remap columns
+          </button>
+          {copyModel && !model?.sameFileDetected && (
+            <ShareControl
+              getSnapshot={getShareSnapshot}
+              onLinkCreated={onShareLinkCreated}
+            />
+          )}
+        </div>
       </div>
 
-      <div className="px-6 py-5 pb-24 space-y-4">
+      <div className="px-6 py-5 space-y-4">
         {/* Current file dropzone — only shown when no file is loaded at all */}
         {!hasCurrentFile && (
           <div>
@@ -641,7 +660,7 @@ export function ChangesView({
         )}
       </div>
 
-      {/* Sticky copy bar — solid bg, scroll padding baked in via pb-24 above */}
+      {/* Static copy bar footer — never overlaps content (A-fix) */}
       {copyModel && !model?.sameFileDetected && (
         <ChangesCopyButtons copyModel={copyModel} />
       )}

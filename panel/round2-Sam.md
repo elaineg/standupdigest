@@ -1,41 +1,39 @@
-# Round 2 — Sam (PM, mobile-heavy, in-audience: weekly Asana→Slack status)
+# Round 2 — Sam (PM, IN-AUDIENCE, mobile-heavy) — REGRESSION RE-CHECK
 
-## My R1 blockers, re-checked
-1. **Mobile Copy-bar overlap (my cosmetic blocker): FIXED.** On 375px, mid-scroll through the
-   tall digest, the Copy bar is `position:fixed; bottom:0px`, sits 749–812px (pinned to the
-   viewport floor), and `elementFromPoint` at its center returns the bar itself — i.e. it's the
-   topmost element, both "Copy Markdown" / "Copy plain text" buttons are fully hittable, and digest
-   rows scroll *underneath* it with the "STILL BLOCKED (1)" header above it fully readable
-   (m-4-midscroll.png). At absolute bottom there's clearance below the last row — nothing hides
-   behind the bar (m-5-bottom.png). Desktop bar pins identically (d-weekly-loaded.png). My blocker
-   is GONE.
-2. **Prose names all categories: FIXED.** Sample reads "Since last week: 3 shipped, 1 started,
-   1 newly blocked, 1 unblocked, 2 slipped, 4 new, 1 still blocked, 2 carried over, 1 removed from
-   tracker." All 9 non-zero categories — not the truncated 4 I saw in R1.
+## Prior concern re-checked
+- R1 hold-off "only validated on clean sample data": still true (this round was scoped to
+  layout/UI, I didn't drop my real Asana CSV). Not a regression.
 
-## Fresh checks
-- **Count honesty: PASS, airtight.** Prose totals 16 items. Copied Markdown = 16 bullets, copied
-  plaintext = 16 bullets, identical sets. Visible = 12 "Edit line" rows + 2 (collapsed Carried) +
-  1 (collapsed Still Blocked) + 1 (Removed). Every representation agrees. The two collapsed carets
-  honestly carry the (2) and (1) counts in their labels, so nothing is silently dropped.
-- **Weekly Status tab: NO REGRESSION.** Loads sample, groups by Assignee with Group-by Epic toggle
-  (my exact use case), week selector, prose summary, same pinned Copy bar (d-weekly-loaded.png).
-- Zero console errors on cold load.
-- (Clipboard read worked in my context with permissions granted; copy buttons verified functional.)
+## What changed — verified fresh @ localhost:3010, 375px
+- **Copy bar = clean STATIC footer (no longer floats over rows):** CONFIRMED. Computed
+  style shows NO fixed/sticky ancestor; on mobile the bar sits BELOW the last content
+  ("UNMAPPED STATUS" row fully visible above it, r2-footer-mobile.png). Whatever risk of
+  it covering rows is gone. Improvement, not a regression.
+- **Share link = prominent PRIMARY button:** CONFIRMED. Now indigo bg, white text,
+  weight-600 — reads as THE action vs the plainer top-right feel before. Improvement.
+- **Saved on this device:** CONFIRMED note "Saved on this device — next week just drop
+  your new export." Exactly the recurring-use nudge for my Friday ritual.
 
-## Verdict
-This is now clean. The one thing that kept me at 8 last round — the bar stomping on content on my
-phone between meetings — is genuinely solved, and the fuller prose line is exactly what I'd paste
-atop a Slack post. **CLARITY: Yes** — "turn your tracker export into a weekly status in seconds,"
-three labeled tabs, instantly legible. **VALUE: Yes** — today I hand-group Asana rows by epic into a
-Notion doc every Friday; this collapses that to load-CSV→Copy. Real recurring time saved.
+## CLARITY — Yes
+Same instant-legible H1/subhead + Load sample. Three labeled tabs (Weekly Status / Sprint
+Review / Changes). Nothing got worse; primary share button sharpens "what do I do next."
 
-What still holds me back from a 9/10: I STILL only validated on *sample* data. I have not run my
-actual Asana export with its custom fields/odd column headers through Remap, and I won't debug a
-column mapping mid-Friday. The "Remap columns" affordance exists and looks right, but until I see it
-swallow my real messy CSV without me fighting it, I can't promise a friend it'll "just work" on
-theirs. That's an honest one-point reservation, not a defect I hit — so I'm raising R1's 8 to a 9.
+## VALUE — Yes
+Still my 30–40 min Friday job in two clicks. Copy Markdown returned 734 chars of the REAL
+digest to the clipboard ("Week of Mon 8 Jun – Sun 14 Jun…") — actual copy, not just a label
+flip. Save-on-device means I won't re-map columns weekly → pushes it toward a habit.
 
-ADVOCACY: 9/10 — I'd bring this up unprompted in our PM channel Friday.
+## ADVOCACY — 9 (NO REGRESSION on anything I liked)
+- Share: created `/s/pGzAyB3jXy0yvVzK6jbIci57`, 0 console errors; uploaded-vs-stays-on-
+  device privacy split intact. Copy link flips to "Link copied ✓" with the real URL on the
+  clipboard (clipboard not even blocked here — fully verified).
+- Mobile shared view (375px): read-only label, color-coded Shipped/In Progress/Blocked,
+  summary line, carry-over tag, "Create your own digest — no signup" CTA, ZERO horizontal
+  overflow. Still impressive for stakeholders.
+- Copy footer no longer risks covering content.
+Still a 9, not 10, for the SAME single reason as R1: unproven on my messy real export, not
+anything the team broke.
 
-{"tester":"Sam","round":2,"clarity":"Yes","value":"Yes","advocacy":9,"blockerResolved":true,"residual":"unproven on my real Asana CSV via Remap — sample-only validation; won't debug a column mapping mid-Friday"}
+```json
+{"tester": 1, "round": 2, "clarity": "Yes", "value": "Yes", "advocacy": 9, "topComplaints": ["Still only validated on clean sample data — haven't dropped my real messy Asana export with custom statuses/columns"], "priorConcernsAddressed": "n/a"}
+```
