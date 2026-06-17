@@ -1,28 +1,56 @@
-# Round 1 — Wen
+# StandupDigest — Round 1 — Wen (Marketing Data Analyst, in-audience)
 
-**Persona:** Marketing data analyst, lives in CSV/BigQuery/Looker, distrusts invisible transforms. IN-AUDIENCE.
+## Cold open (5s)
+"Turn your tracker export into a weekly status — in seconds." + "Drop a Jira, Linear, Asana,
+or GitHub CSV." I got it instantly. "Your file never leaves your browser — no upload, no
+signup" is exactly the line that earns trust from someone who lives in data hygiene. I'd stay.
 
-## (1) CLARITY — Yes
-Within 5s I got it: H1 "Turn your tracker export into a weekly status — in seconds," subline names Jira/Linear/Asana/GitHub and the Shipped/In Progress/Blocked output, paste-into-Slack. And the privacy line "Your file never leaves your browser — no upload, no signup" is right there under the dropzone. Exactly the two things I check first. No ambiguity.
+## The new Changes tab (discovered it myself, 3rd tab)
+Loaded "Load sample data" (loads current + prior in one click). Digest rendered cleanly with
+a prose one-liner + buckets + editable lines + Copy MD / Copy plaintext.
 
-## (2) VALUE — Yes
-Today I hand-build these from a Jira CSV in Google Sheets with a pivot + manual prose. This does the bucketing, assignee/epic grouping, carry-over flag, and a one-line prose summary, then Copy as Markdown/plain text. That's a real chunk of my Friday gone. What earns my trust:
-- **It does NOT silently mis-bucket.** Unknown statuses ("Needs Triage Review", "Won't Do", "Code Review") go to an explicit **UNMAPPED STATUS** bucket with a "Move to…" control — it asks instead of guessing. This is the single behavior that converts me.
-- I audited my own 8-row CSV: every row accounted for (2+2+1+1+2=8), nothing dropped. Quoted commas in titles preserved. Lowercase "in progress" matched case-insensitively. Blank assignee handled cleanly ("(no epic)", no fake owner).
-- When headers are unrecognizable it pops a **"Map your columns"** dialog. Transparent. Love it.
-- Markdown + plain-text copy both fired ("Copied ✓"); output is clean and Slack-ready. (Clipboard read worked in my env.)
+### Count audit (my specialty) — PASSED
+Prose: "Since last week: 3 shipped, 1 newly blocked, 2 slipped, 4 new."
+On-screen header counts == rows shown == copied Markdown == copied plaintext, exactly:
+Newly Shipped 3, Newly Blocked 1, Slipped/Reopened 2, New 4, Unblocked 1, Newly Started 1,
+Carried over 2, Still Blocked 1, Removed 1. No mismatch anywhere. The prose deliberately
+highlights only 4 categories (not a grand total) — fine, it's a summary line, not a checksum.
 
-## (3) ADVOCACY — 7  → honest 6
-I'd mention it to my marketing-ops peers, but not unprompted-evangelist level, because of one trust gap below.
+### Bucketing audit with MY OWN crafted CSVs — PASSED (the thing that wins me over)
+I built a 6-row prior/current pair to probe each transition and every row bucketed correctly:
+In-Progress→Done = Newly Shipped; ToDo→Blocked = Newly Blocked; Blocked→In-Progress = Unblocked;
+In-Progress→In-Progress = Carried over; row dropped from current = Removed from tracker;
+row absent in prior = New this period. The diff keys on the issue Key column, not summary text,
+so a renamed summary won't fake an add/remove. No silent mis-bucketing — this is what I came to
+break and it held. "All statuses recognized ✓" on the Weekly tab is another good trust signal.
 
-## Hesitation / BUG (data-hygiene)
-Real issue: with `weird.csv` (headers `Task Name,Owner,State`), it auto-detected the **status** column ("Closed"→Shipped, "Active"→In Progress — nice) but FAILED to detect the title column, so both rows rendered as **"(untitled)"** — and because partial auto-detect "succeeded," it **never showed the column-mapping dialog and offers NO way to reopen it.** No "Remap columns" button anywhere after load. So my titles silently vanished into "(untitled)" and I can only fix them one-by-one via "Edit line." For someone who distrusts invisible transforms, a title dropped to "(untitled)" with no warning is exactly the failure mode I fear — and real Jira/Asana exports have non-standard header names constantly.
+### Weekly Status tab still works — PASSED
+My CSV: Shipped 1, In Progress 2, Blocked 1, Backlog 1, summary matches. Group-by Assignee works.
 
-Minor: in the Markdown copy, the unmapped "Audit accessibility issues" row gained "(Bob)" attribution that wasn't shown in the rendered view — small inconsistency.
+## The one real defect
+Copy buttons LAYOUT BUG: in the default collapsed view the "Copy Markdown / Copy plain text"
+buttons render mid-list (measured y=850, between Slipped at y=490 and New-this-period at y=939),
+overlapping the digest instead of sitting at the bottom. Copied content is correct, but it looks
+broken on first glance and made me double-check I'd copied the whole thing. Fix the button anchor.
+(Copy verified by reading clipboard with permissions granted — output is faithful.)
 
-## The ONE thing that would raise my score
-Always expose a **"Remap columns"** button (and trigger the mapping dialog whenever ANY of title/status/assignee fails to auto-map, not only on total failure). The instant I can never get silently-"(untitled)" rows, I trust it on real exports and this goes to a 9.
+## Q1 — First reaction / would I use it for real work?
+Yes. I build recurring stakeholder status reports from Jira exports every week; this is the
+diff-since-last-week view I currently hand-build. I'd genuinely drop my export here.
+
+## Q2 — The ONE thing stopping advocacy
+The mid-list copy-button overlap. It's cosmetic but it's the first thing a skeptic sees, and for
+a tool whose whole pitch is trustworthy output, looking half-broken undercuts that on sight.
+
+## Q3 — Trustworthy & copy-ready?
+Yes. Counts reconcile screen↔prose↔both copy formats, bucketing is correct and key-based, and the
+Markdown pastes straight into Slack/a doc. This is copy-ready for my marketing-ops stakeholders.
+
+## Scores
+ADVOCACY: 8/10 (would bring it up to my PM peers; the layout glitch holds it off a 9)
+VALUE: Yes — replaces my manual week-over-week diff in Sheets
+CLARITY: Yes
 
 ```json
-{"tester": 1, "round": 1, "clarity": "Yes", "value": "Yes", "advocacy": 6, "topComplaints": ["Partial auto-detect drops title to '(untitled)' with no warning and no way to reopen the column mapper", "Mapping dialog only appears on total auto-detect failure, not partial — risky for non-standard Jira/Asana headers", "Markdown copy added an assignee to an unmapped row that the rendered view didn't show"], "priorConcernsAddressed": "n/a"}
+{"tester": "Wen", "round": 1, "clarity": "Yes", "value": "Yes", "advocacy": 8, "topComplaints": ["Copy Markdown/plain-text buttons render mid-list in the default collapsed view, overlapping the digest (looks broken though copied text is correct)", "Prose one-liner only names 4 of 9 buckets — fine as a highlight, but a hygiene reader briefly wonders if Unblocked/Removed were dropped"], "priorConcernsAddressed": "n/a"}
 ```

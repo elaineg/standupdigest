@@ -1,28 +1,55 @@
-# Round 1 — Sam
+# StandupDigest — Round 1 — Sam (PM, mobile-heavy, IN-AUDIENCE)
 
-PM, mobile-heavy. My real weekly job: turn an Asana export into a stakeholder status to paste into Slack.
+Tested cold on a 375px mobile viewport (laptop is my fallback). No console errors anywhere.
 
-## (1) CLARITY — Yes
-Headline "Turn your tracker export into a weekly status — in seconds" plus "Get a Shipped / In Progress / Blocked digest ready to paste into Slack" told me exactly what it does in ~3s. And right under the drop zone: "Your file never leaves your browser — no upload, no signup." That line is gold — it's the first thing my eyes wanted and it answered it. The "Jira · Linear · Asana · GitHub Issues" subtext sold me it'd take MY export.
+## First 30 seconds
+H1: "Turn your tracker export into a weekly status — in seconds." Subhead names Jira/Linear/
+Asana/GitHub CSV → Shipped/In Progress/Blocked digest "ready to paste into Slack." That's my
+Monday morning ritual described back to me. I'd stay. Three tabs visible immediately: Weekly
+Status (default), Sprint Review, Changes. I spotted Changes without hunting.
 
-## (2) VALUE — Yes
-Today I hand-build this every Friday: open Asana, eyeball sections, retype a bulleted status into Slack, group it, write the one-liner. 20 minutes of busywork to look organized.
-- Loaded sample: instant digest with a prose one-liner ("shipped 5, 4 in progress, 2 blocked, 1 carried over") — that's literally my opening sentence, done for me.
-- Toggled Assignee ↔ Epic grouping: both clean. Epic grouping ("Checkout v2", "Finance") is how my stakeholders think.
-- Dropped my OWN Asana-style CSV (Name/Assignee/Section/Projects/Completed At, with "Doing"/"Done"/"To Do"): parsed perfectly, mapped statuses right, and showed "All statuses recognized ✓". That confidence signal matters — I won't debug a mis-parse.
-- Copy Markdown AND Copy plain text both produce clean Slack-ready output (`##`/`-` for Markdown, `•` bullets for plain). Carry-over tag survives the copy. This is the whole job, done in 15 seconds.
+## The new "Changes" tab — discovered it myself, clicked "Load sample data"
+The empty state sells itself: two drop zones, "Current export (now)" + "Compare to last week's
+export (optional)", with "See what changed since your last export." One "Load sample data" click
+populated BOTH the current and prior week — exactly as promised, no second upload needed.
 
-## (3) ADVOCACY — 8
-I'd bring this up in my team channel unprompted Friday afternoon. Not a 9 only because I haven't trusted it with a messy real export yet (multi-project rows, weird custom sections), and "Move to…" for one unmapped status is a small manual step.
+Output is genuinely the "what moved this week" framing I'd kill for in a stakeholder update:
+Newly Shipped, Newly Blocked, Slipped/Reopened, New this period, Unblocked, Newly Started, plus
+collapsible Carried-over, Still Blocked, and a "Removed from tracker" list. Owners in parens. A
+one-line prose summary at top ("Since last week: 3 shipped, 1 newly blocked, 2 slipped, 4 new")
+and an Edit line on every item. This makes me look organized with zero effort.
 
-## Hesitation / bugs
-- No real bug. (Copy buttons fired and flipped to "Copied ✓"; clipboard read was blocked in my test env, not the app — verified visually.)
-- The floating "Copy Markdown / Copy plain text" bar sits mid-scroll on mobile, not pinned to the bottom — on a long digest I scrolled past it once. Minor.
-- "Edit line" on every row is nice but visually noisy on mobile.
+## Count + copy trust check (I did inspect the clipboard)
+Prose summary "3 shipped, 1 newly blocked, 2 slipped, 4 new" matches the on-screen section
+headers AND the item counts under them. I copied BOTH formats and read the clipboard:
+- Markdown copy: every section header count (3/1/2/4/1/1/1/2/1) equals its bullet count. ✓
+- Plaintext copy: identical counts, clean • bullets. ✓
+- The collapsed Still Blocked (1) and Carried-over (2) sections show the right counts and their
+  hidden rows appear correctly in the copied text. No phantom or missing rows. ✓
+NO count mismatch found — screen, prose, markdown, and plaintext all agree. This is the thing I
+most distrust in auto-summaries, and it held up.
 
-## ONE thing that would raise my score
-Let me edit/override the auto one-line summary prose (or add a "for week of <date>" stamp) before copying — that sentence is the part my VP actually reads, and I'd want to tweak the tone. That + proving it eats a messy real Asana export gets it to a 9.
+## Weekly Status tab still works
+Loaded sample: grouped by Assignee (Epic toggle present), week filter, prose summary "shipped 5,
+4 in progress, 2 blocked, 1 carried over", SHIPPED (5) lists 5. Plus a nice "Unmapped status"
+re-bucket control. No regression.
+
+## Answers
+- Q1 first reaction / would I use it: Yes — this is my real weekly Asana-to-Slack job, and the
+  Changes tab is the part I currently do by hand-diffing two exports. I'd use it this Friday.
+- Q2 the ONE thing stopping advocacy: I never proved it on MY real Asana CSV — only the sample.
+  Asana column names (and my custom fields) are the usual failure point, and the persona won't
+  debug a remap. "Remap columns" exists, but until I drop my own export and it just works, I
+  hold back a full unprompted rave.
+- Q3 trustworthy / copy-ready: Yes. Counts reconcile across screen and both clipboards, owners
+  included, paste-ready Markdown for Slack/Notion. I'd paste this into a stakeholder update as-is.
+
+## Scores
+ADVOCACY: 8/10 — I'd bring it up to other PMs; the half-point-shy is only because I haven't run
+my own messy export through it yet.
+VALUE: Yes — replaces a manual two-export diff I do weekly.
+CLARITY: Yes.
 
 ```json
-{"tester": 1, "round": 1, "clarity": "Yes", "value": "Yes", "advocacy": 8, "topComplaints": ["Copy bar floats mid-scroll on mobile instead of pinned, scrolled past it", "Can't edit the auto prose one-liner before copying", "Per-row 'Edit line' buttons add visual noise on mobile"], "priorConcernsAddressed": "n/a"}
+{"tester": 1, "round": 1, "clarity": "Yes", "value": "Yes", "advocacy": 8, "topComplaints": ["Only validated on sample data — unproven on my real Asana CSV with custom fields, and I won't debug a column remap", "Copy bar is sticky and overlaps content mid-scroll on mobile (cosmetic)"], "priorConcernsAddressed": "n/a"}
 ```

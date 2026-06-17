@@ -1,27 +1,43 @@
-# Dana — Round 2
+# Round 2 — Dana (demand-gen marketer, in-audience)
 
-**Persona:** Demand-gen lead, runs a small Asana team, owes a weekly stakeholder status. Ruthless about time; value must land in one scroll.
+R1: advocacy 8, Value=Yes, Clarity=Yes.
 
-## PRIOR CONCERNS — resolved?
-- **Week-over-week / carry-over delta (my #1 ask): YES.** Week selector at top ("Week of Mon 8 Jun – Sun 14 Jun" / "All dates"). Switched to the empty old week (Dec 30 → "shipped 0 items") and the still-open prior-week item ("Migrate old orders [carry-over]") STAYED visible and flagged. The `[carry-over]` tag also carries into both copied formats. This is the delta stakeholders read — satisfied.
-- **Phantom `(Bob)` in copy: YES, fixed.** Copied Markdown AND plain text exactly match the screen — no parens-name. Verified the literal clipboard text both formats.
-- **Redundant `(assignee)` parens shown on-screen when grouped by assignee: NO, still there.** On-screen still renders "Launch payment flow(Sam)" under "👤 Sam". Cosmetic, and the COPY output drops it correctly, so it's a screen-only nit now.
+## Did the fixes land?
+1. **Copy bar pinning** — FIXED. Element is literally `fixed bottom-0 left-0 right-0 z-50`.
+   Desktop: scrolled to the very bottom, last row "Deprecate legacy API (Bob)" sits fully
+   above the bar with clearance — no row overlap, both buttons hittable. Mobile (375px):
+   bar at top 717 in a 780 viewport, 63px tall, sits flush at bottom, last row fully clear.
+   My R1 "is it really pinned?" doubt is resolved — it's explicit and clean on both.
+2. **Fuller prose summary** — FIXED and it MATTERS. Reads: "Since last week: 3 shipped,
+   1 started, 1 newly blocked, 1 unblocked, 2 slipped, 4 new, 1 still blocked, 2 carried
+   over, 1 removed from tracker." That's the whole status in one line — I could paste THAT
+   alone into the stakeholder channel and be done. After clicking Load sample, this line
+   sits comfortably above the fold with rows already showing. The R1 "payoff one scroll too
+   low" gripe is gone — the payoff is now the first thing I read.
 
-## (1) CLARITY — Yes
-Same strong landing ("Turn your tracker export into a weekly status — in seconds", no-upload/no-signup line under the dropzone). Got it in 5s. The new "Week:" selector and the "Week of <date>: ..." prose make the time-scope explicit, which is better for a status doc.
+## Count honesty (re-confirmed)
+Prose digits sum = 16. Header counts [3,1,2,4,1,1,2,1,1] = 16. Copied Markdown = 16
+author-tagged rows. Copied plain text = 16. Prose one-liner is included in both copies.
+Numbers are internally consistent everywhere. Pass.
 
-## (2) VALUE — Yes
-Still beats my Notion/Canva hand-massage. The carry-over delta + editable prose are the unlock: I clicked "Edit", rewrote the opening line ("...billing reports unblocked. — Dana"), and it flowed verbatim into the copied Markdown. Grouping toggle (Assignee for 1:1s / Epic for execs) and both copy formats still work. Saves my ~20 min Friday.
+## Regression — Weekly Status
+Still works. Own prose summary ("This week the team shipped 5 items, has 4 in progress and
+2 blocked, with 1 carried over"), group-by Assignee/Epic, week selector all present after
+Load sample. No regression.
 
-## (3) ADVOCACY — 8/10
-Up from a held-back 8; the delta ask landed but a real-data snag keeps it off 9. I uploaded an actual Asana export (columns: Task Name, Assignee, Section, Completed At). Statuses + counts mapped fine, but every task showed **"(untitled)"** — auto-detect missed the "Task Name" title column. The Remap panel auto-opened with a clear warning ("We couldn't auto-detect which columns are which") and Title/Summary set to "(none)"; I pointed it at "Task Name", hit Apply, and titles appeared correctly. Recoverable, well-signposted — but for "value in one scroll", the literal Asana column header should auto-map so I never see "(untitled)".
+## Honest residual
+The R1 blocker (payoff below fold + pinning doubt) is RESOLVED. My remaining held-back
+concern stands but is untouched by this round: I still hand-export TWO Asana CSVs (this
+week + last week) for the Changes diff, and there's no local memory of last week's export
+so I re-drop it every time. That's the one thing keeping this from being a one-click
+Monday ritual. Not a defect — a missing convenience. Everything I complained about that
+WAS in scope this round got fixed cleanly, so I'm moving up.
 
-## Residual hesitations
-- Asana's "Task Name" header not auto-detected → "(untitled)" on first parse (one manual Remap fixes it). Quote on screen: "(untitled)(Dana)".
-- "All dates" prose still reads "**This week** the team shipped 5..." — wrong tense for the all-dates view; should say "Across all dates".
-- On-screen redundant "(Sam)" parens under "👤 Sam" grouping persists (copy is clean).
-- Still a per-export tool — no saved/recurring view; I re-export from Asana weekly.
+VALUE: Yes — the full one-line summary alone replaces my manual "skim the board and write
+the TL;DR" step; copy output is paste-ready for Slack/Notion.
+CLARITY: Yes — "Turn your tracker export into a weekly status — in seconds" + the prose
+line make it obvious in well under 30 seconds.
+ADVOCACY: 9 — I'd screenshot the full one-liner into the team channel unprompted. Held off
+a 10 only by the two-export friction / no remembered prior export.
 
-```json
-{"tester": 5, "round": 2, "clarity": "Yes", "value": "Yes", "advocacy": 8, "topComplaints": ["Asana 'Task Name' header not auto-detected -> tasks show (untitled) until I manually Remap", "'All dates' prose still says 'This week the team shipped...' (wrong scope)"], "priorConcernsAddressed": "some"}
-```
+{"tester":"Dana","round":2,"clarity":"Yes","value":"Yes","advocacy":9,"blockerResolved":true,"residual":"still hand-export two Asana CSVs for the diff; no local memory of last week's export"}

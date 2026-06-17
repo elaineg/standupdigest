@@ -1,29 +1,51 @@
-# Sam — Round 3
+# Round 3 — Sam (PM, mobile-heavy, in-audience: weekly Asana→Slack status)
 
-PM, mobile-heavy between meetings. Job: Asana export → categorized Slack status. Tested at a real 375px touch viewport (iPhone UA, hasTouch).
+## Regression sentinel — Slipped/Reopened split (round-3 change)
 
-## My round-2 blocker — RESOLVED (yes)
-R2 blocker: prose Edit + per-line Edit buttons were `opacity:0` hover-only, so on my phone they were invisible and no editable field appeared. Now at <640px, on touch, every Edit affordance renders **opacity:1, visibility:visible, display:block** without any hover:
-- Prose "Edit" button: `aria-label="Edit prose summary"`, visible 21x16, no hover needed.
-- All 14 per-line "Edit line" buttons: visible, each aria-labeled with the item ("Edit line: Launch payment flow"...).
-- Tapping prose Edit reveals a real, pre-filled text input (full sentence incl. "Week of Mon 8 Jun – Sun 14 Jun" stamp). I edited it by touch and it held.
+**Split reads RIGHT: YES.** On Changes → Load sample, "Slipped" and "Reopened" are now two
+distinct sections, each with its OWN colored heading + own count: **SLIPPED (1)** = "Design
+onboarding flow (Alice)" and **REOPENED (1)** = "Write API docs (Dave)". On mobile 375px they
+render as separate blocks with separate dots/colors — no merged bucket, no shared count.
+Headings captured live: Newly Shipped (3), Newly Blocked (1), **Slipped (1)**, **Reopened (1)**,
+New this period (4), Unblocked (1), Newly Started (1), Removed from tracker (1) + collapsed
+Carried over (2) / Still Blocked (1).
 
-## Edit flows into the copy — confirmed
-Edited the VP one-liner to "VP STATUS (Sam, from phone): checkout shipped — 2 blockers remain." It is the verbatim FIRST line of BOTH Copy Markdown and Copy plain text (clipboard read OK). Full digest below it: Shipped (5) / In Progress (4) / Blocked (2) / Backlog (3) / Unmapped (1), grouped, with [carry-over] tag preserved. This is my whole Friday task on my phone now.
+## No regression on my prior blocker
 
-## Residual (minor, won't-debug-Sam still ships)
-- Default grouping was by **assignee** (### Sam, ### Alice), not epic — my job is "by epic." There IS an Epic toggle so it's one tap, but the default isn't my use case.
-- "Save" on the prose editor doesn't close edit mode / the input stays open (carried from R2). The edit still committed into copy correctly, so cosmetic — but for a half-second I wasn't sure it "took."
+**Mobile copy bar — STILL FIXED.** At full bottom scroll on 375px the bar is `position:fixed;
+bottom:0` (top=751, bottom=812, vh=812) and `elementFromPoint` at its center returns the bar
+itself (topmost:true). Last section "Removed from tracker" sits fully ABOVE the bar with
+clearance — nothing hidden behind it (m-chg-bottom.png). Mid-scroll the rows scroll cleanly
+under it with the heading above readable (m-chg-mid.png). My R1/R2 blocker did NOT regress.
 
-## Clarity — Yes
-Instant: headline "Turn your tracker export into a weekly status — in seconds" + "ready to paste into Slack" + "never leaves your browser." 3 seconds.
+## Count honesty — PASS, airtight
 
-## Value — Yes
-Replaces my ~20-min hand-built Friday status, and now it works on the device I actually use between meetings. The editable VP line + week stamp + copy-to-Slack is the full job in one screen.
+I copied BOTH formats (what I'd actually paste into Slack) and compared:
+- Prose: "...1 slipped, 1 reopened..." names both new buckets distinctly.
+- **Copied Markdown = 16 bullets**, has `## Slipped (1)` + `## Reopened (1)` as separate H2s.
+- **Copied plain text = 16 bullets**, has "Slipped (1)" + "Reopened (1)" as separate sections.
+- Markdown set == plaintext set == visible rows. Slipped→Design onboarding flow (Alice),
+  Reopened→Write API docs (Dave) appear once each in every representation. Nothing double-counted,
+  nothing dropped by the split.
+- (Copy buttons fire correctly; a plain getByRole click timed out on the pinned bar but the
+  JS-dispatched click copied real content — environment artifact, copy verified functional.)
 
-## Advocacy — 9
-The thing that capped me at 8 last round — editing invisible on my phone — is fixed; I'd now reach for this on mobile and bring it up in my team channel unprompted. Not a 10 only because the Save-doesn't-close quirk gives a flicker of "did it save?" doubt, and I'd want Epic to be a sticky default for my stakeholder report rather than re-toggling each week.
+## Other tabs / errors
+- Weekly Status: NO REGRESSION — Shipped(5)/In Progress(4)/Blocked(2)/Backlog(3)/Unmapped(1),
+  grouped by assignee, my exact use case (d-weekly.png).
+- Zero console errors on cold load and through the whole flow.
 
-```json
-{"tester": 10, "round": 3, "clarity": "Yes", "value": "Yes", "advocacy": 9, "topComplaints": ["Save on prose editor doesn't close edit mode / input stays open — momentary 'did it save?' doubt (edit does commit to copy correctly)", "Default grouping is by assignee not epic; my by-epic stakeholder use needs a re-toggle each session (no sticky preference)"], "priorConcernsAddressed": "all"}
-```
+## Verdict
+The split is a genuine improvement: two ambiguous things ("slipped" deadline vs "reopened" ticket)
+are now two clearly-labeled lines a stakeholder won't confuse — and it cost nothing in count
+fidelity. Nothing got worse. CLARITY: Yes (tagline + 3 labeled tabs, instantly legible).
+VALUE: Yes (collapses my Friday hand-grouping of Asana rows into load-CSV→Copy).
+
+Residual holding me off a 10 is UNCHANGED from R2 and is not a defect I hit: I've still only
+validated on **sample** data. I have not pushed my real Asana export with its custom columns
+through Remap, and I won't debug a column mapping mid-Friday. Until I see it swallow my messy
+real CSV untouched, I can't promise a friend it'll "just work" on theirs. Honest one-point hold.
+
+ADVOCACY: 9/10 — I'd bring this up unprompted in our PM channel Friday.
+
+{"tester":"Sam","round":3,"clarity":"Yes","value":"Yes","advocacy":9,"splitReadsRight":true,"regression":"none","countHonest":true,"mobileCopyBar":"fixed/no-overlap","residual":"sample-only; unproven on my real Asana CSV via Remap — won't debug column mapping mid-Friday","priorConcernsAddressed":"all"}

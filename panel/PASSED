@@ -1,1 +1,6 @@
-PASSED 2026-06-16 round4: 5/5 in-audience (Wen/Tomás/Sam/Elena/Dana all adv9, Yes/Yes) — audience-weighted bar met; non-fits (Priya5/Marcus7/Jules6/Aisha8/Rob4) cap on audience-fit not defects.
+PASSED — 5/5 in-audience at advocacy>=9 / Value=Yes / Clarity=Yes (round 3), audience-weighted bar.
+Feature: "Changes since last week" compare mode (add-feature run 20260616-190213-daily).
+In-audience compilers: Wen 9, Tomás 9, Dana 9, Elena 9, Sam 9. 5 non-fits carried non-gating
+(Aisha 7, Marcus 6, Priya 4, Jules 3, Rob 2).
+Arc: R1 0/5 (all 8) -> R2 4/5 (copy-bar pin + full-prose fix) -> R3 5/5 (Slipped/Reopened split).
+See SYNTHESIS-round{1,2,3}.md.

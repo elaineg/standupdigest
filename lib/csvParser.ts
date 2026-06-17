@@ -15,6 +15,7 @@ export interface ColumnMap {
   sprint: string;
   added: string;   // date a row was added mid-sprint (for scope change)
   removed: string; // date a row was removed from sprint (for scope change)
+  issueKey: string; // stable id for Changes tab matching (Jira Key, Linear ID, GitHub number, Asana task id)
 }
 
 export interface DigestRow {
@@ -31,6 +32,7 @@ export interface DigestRow {
   sprint: string;        // raw sprint/cycle value
   addedDate: string;     // date added mid-sprint (empty if not applicable)
   removedDate: string;   // date removed from sprint (empty if not applicable)
+  issueKey: string;      // stable id for Changes tab matching (empty if no id column)
 }
 
 export interface ParseResult {
@@ -119,6 +121,19 @@ const REMOVED_ALIASES = [
   "removed from sprint",
 ];
 
+// Changes tab — stable id column for row matching across exports
+const ISSUE_KEY_ALIASES = [
+  "issue key",   // Jira
+  "key",         // Jira short form
+  "id",          // Linear "ID"
+  "identifier",  // Linear "Identifier"
+  "number",      // GitHub issue number
+  "url",         // GitHub issue URL
+  "task id",     // Asana task id
+  "permalink",   // Asana permalink
+  "issue id",
+];
+
 // ---- Status→Bucket keyword map ----
 
 const SHIPPED_KEYWORDS = [
@@ -197,12 +212,13 @@ export function autoDetectColumns(headers: string[]): {
   const sprint = matchHeader(headers, SPRINT_ALIASES);
   const added = matchHeader(headers, ADDED_ALIASES);
   const removed = matchHeader(headers, REMOVED_ALIASES);
+  const issueKey = matchHeader(headers, ISSUE_KEY_ALIASES);
 
   const found = [title, status, assignee].filter(Boolean).length;
   const confidence = found >= 2 ? "high" : "low";
 
   return {
-    columnMap: { title, status, assignee, epic, date, storyPoints, sprint, added, removed },
+    columnMap: { title, status, assignee, epic, date, storyPoints, sprint, added, removed, issueKey },
     confidence,
   };
 }
@@ -306,6 +322,7 @@ export function parseCSVText(
     sprint: overrideMap?.sprint ?? autoMap.sprint,
     added: overrideMap?.added ?? autoMap.added,
     removed: overrideMap?.removed ?? autoMap.removed,
+    issueKey: overrideMap?.issueKey ?? autoMap.issueKey,
   };
 
   // Compute a single reference date from the dataset's own most-recent date.
@@ -325,6 +342,7 @@ export function parseCSVText(
     const removedDate = (columnMap.removed ? row[columnMap.removed] : "") ?? "";
 
     const storyPoints = rawPoints !== "" ? Math.max(0, parseFloat(rawPoints) || 0) : 0;
+    const issueKey = (columnMap.issueKey ? row[columnMap.issueKey] : "") ?? "";
 
     // GitHub: use GitHub-specific bucket logic (open→In Progress, labels→Blocked override)
     const bucket = status
@@ -348,6 +366,7 @@ export function parseCSVText(
       sprint: sprint.trim(),
       addedDate: addedDate.trim(),
       removedDate: removedDate.trim(),
+      issueKey: issueKey.trim(),
     };
   });
 

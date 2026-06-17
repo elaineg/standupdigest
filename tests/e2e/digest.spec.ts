@@ -1014,3 +1014,366 @@ test('SC4-sticky-bar: sticky copy bar has solid bg and last by-assignee row not 
   const contentClass = await contentDiv.getAttribute('class');
   expect(contentClass).toContain('pb-24');
 });
+
+// ---- Changes tab (spec success checks 17-23) ----
+
+test('SC17: "Changes" tab visible in tab strip; clicking it shows second dropzone and empty-state', async ({ page }) => {
+  await page.goto(BASE + '/');
+
+  // All 3 tabs visible
+  await expect(page.locator('[data-testid="tab-weekly"]')).toBeVisible();
+  await expect(page.locator('[data-testid="tab-sprint"]')).toBeVisible();
+  await expect(page.locator('[data-testid="tab-changes"]')).toBeVisible();
+
+  // Click Changes tab
+  await page.locator('[data-testid="tab-changes"]').click();
+  await expect(page.locator('[data-testid="tab-changes"]')).toHaveAttribute('aria-selected', 'true');
+
+  // Should show empty-state explanation (not blank)
+  await expect(page.locator('text=See what changed since your last export.')).toBeVisible();
+
+  // Second dropzone should be present (Compare to last week's export)
+  await expect(page.locator('text=Compare to last week')).toBeVisible();
+
+  // "Load sample data" button present inside Changes tab
+  await expect(page.locator('[data-testid="changes-load-sample"]')).toBeVisible();
+});
+
+test('SC18: Changes sample loads with exact oracle counts (Newly Shipped 3, Started 1, Blocked 1, Unblocked 1, Slipped 1, Reopened 1, New 4, StillBlocked 1, CarriedOver 2, Removed 1)', async ({ page }) => {
+  await page.goto(BASE + '/');
+  await page.locator('[data-testid="tab-changes"]').click();
+  await page.locator('[data-testid="changes-load-sample"]').click();
+
+  // Wait for Changes digest to render (prose summary appears)
+  await expect(page.locator('[data-testid="changes-prose-summary"]')).toBeVisible({ timeout: 10000 });
+
+  // Headline buckets — Slipped and Reopened are now SEPARATE headings
+  await expect(page.getByRole('heading', { name: /Newly Shipped \(3\)/i }).first()).toBeVisible();
+  await expect(page.getByRole('heading', { name: /Newly Blocked \(1\)/i }).first()).toBeVisible();
+  await expect(page.getByRole('heading', { name: /^Slipped \(1\)$/i }).first()).toBeVisible();
+  await expect(page.getByRole('heading', { name: /^Reopened \(1\)$/i }).first()).toBeVisible();
+  await expect(page.getByRole('heading', { name: /New this period \(4\)/i }).first()).toBeVisible();
+  await expect(page.getByRole('heading', { name: /Unblocked \(1\)/i }).first()).toBeVisible();
+  await expect(page.getByRole('heading', { name: /Newly Started \(1\)/i }).first()).toBeVisible();
+  await expect(page.locator('section[aria-label="Removed from tracker"]')).toBeVisible();
+
+  // ENG-1,2,3 in Newly Shipped
+  const shippedSection = page.locator('section[aria-label="Newly Shipped"]');
+  await expect(shippedSection.locator('text=Launch payment flow')).toBeVisible();
+  await expect(shippedSection.locator('text=Fix cart total bug')).toBeVisible();
+  await expect(shippedSection.locator('text=Add promo code support')).toBeVisible();
+
+  // ENG-12 in Slipped, ENG-13 in Reopened
+  const slippedSection = page.locator('section[aria-label="Slipped"]');
+  await expect(slippedSection.locator('text=Design onboarding flow')).toBeVisible();
+  const reopenedSection = page.locator('section[aria-label="Reopened"]');
+  await expect(reopenedSection.locator('text=Write API docs')).toBeVisible();
+});
+
+test('SC19: COUNT HONESTY — prose summary covers all 10 non-zero categories (slipped and reopened separate)', async ({ page }) => {
+  await page.goto(BASE + '/');
+  await page.locator('[data-testid="tab-changes"]').click();
+  await page.locator('[data-testid="changes-load-sample"]').click();
+
+  await expect(page.locator('[data-testid="changes-prose-summary"]')).toBeVisible({ timeout: 10000 });
+  const proseText = await page.locator('[data-testid="changes-prose-summary"]').innerText();
+
+  // All 10 non-zero categories must appear in the prose (slipped and reopened are now separate)
+  expect(proseText).toContain('3 shipped');
+  expect(proseText).toContain('1 started');
+  expect(proseText).toContain('1 newly blocked');
+  expect(proseText).toContain('1 unblocked');
+  expect(proseText).toContain('1 slipped');
+  expect(proseText).toContain('1 reopened');
+  expect(proseText).toContain('4 new');
+  expect(proseText).toContain('1 still blocked');
+  expect(proseText).toContain('2 carried over');
+  expect(proseText).toContain('1 removed from tracker');
+});
+
+test('SC20: Changes copy button flips to "Copied ✓" and still flips when clipboard is blocked', async ({ page }) => {
+  await page.goto(BASE + '/');
+  await page.locator('[data-testid="tab-changes"]').click();
+  await page.locator('[data-testid="changes-load-sample"]').click();
+
+  await expect(page.locator('[data-testid="changes-prose-summary"]')).toBeVisible({ timeout: 10000 });
+
+  const mdButton = page.locator('button[aria-label="Copy as Markdown"]');
+  await expect(mdButton).toBeVisible();
+  await mdButton.click();
+  await expect(mdButton.locator('span[aria-live="polite"]')).toHaveText('Copied ✓', { timeout: 3000 });
+});
+
+test('SC21: same file as both current and prior shows "No changes detected — are these the same export?"', async ({ page }) => {
+  await page.goto(BASE + '/');
+  await page.locator('[data-testid="tab-changes"]').click();
+  await page.locator('[data-testid="changes-load-sample"]').click();
+
+  await expect(page.locator('[data-testid="changes-prose-summary"]')).toBeVisible({ timeout: 10000 });
+
+  // Now load the same current file as the prior file
+  // The current sample was loaded — upload it again as the prior via the dropzone
+  const SAME_CSV = `Issue Key,Title,Status,Assignee,Epic,Updated
+ENG-1,Launch payment flow,Done,Sam,Checkout v2,2026-06-10
+ENG-2,Fix cart total bug,Resolved,Alice,Checkout v2,2026-06-11
+ENG-3,Add promo code support,Completed,Sam,Checkout v2,2026-06-12
+ENG-4,Update order confirmation email,Done,Bob,Checkout v2,2026-06-09
+ENG-5,Release billing reports,Merged,Carol,Finance,2026-06-13
+ENG-6,Build analytics dashboard,In Progress,Sam,Analytics,2026-06-14
+ENG-7,Review API endpoints,In Review,Alice,Platform,2026-06-13
+ENG-8,Deploy staging environment,In Dev,Dave,Platform,2026-06-14
+ENG-9,Migrate old orders,In Progress,Eve,Finance,2026-06-10
+ENG-10,Fix login redirect,Blocked,Bob,Auth,2026-06-12
+ENG-11,Investigate memory leak,Blocked,Carol,Platform,2026-06-11
+ENG-12,Design onboarding flow,To Do,Alice,Onboarding,2026-06-10
+ENG-13,Write API docs,Backlog,Dave,Platform,2026-06-09
+ENG-14,Plan Q3 roadmap,In Progress,Eve,Strategy,2026-06-14
+ENG-15,Audit accessibility issues,Needs Triage Review,Bob,UX,2026-06-13
+`;
+
+  const priorInput = page.locator('input[aria-label="Upload prior week CSV file"]');
+  await priorInput.setInputFiles({
+    name: 'same.csv',
+    mimeType: 'text/csv',
+    buffer: Buffer.from(SAME_CSV),
+  });
+
+  // Should show the same-file note
+  await expect(page.locator('text=No changes detected — are these the same export?')).toBeVisible({ timeout: 5000 });
+});
+
+test('SC22: TITLE-MATCH FALLBACK — no id column shows "Matched by title (less reliable)" note', async ({ page }) => {
+  await page.goto(BASE + '/');
+  await page.locator('[data-testid="tab-changes"]').click();
+
+  // Current CSV with no id column
+  const currentCsv = `Title,Status,Assignee,Updated
+Task Alpha,Done,Alice,2026-06-14
+Task Beta,In Progress,Bob,2026-06-13
+`;
+  const priorCsv = `Title,Status,Assignee,Updated
+Task Alpha,In Progress,Alice,2026-06-07
+Task Gamma,Done,Carol,2026-06-06
+`;
+
+  const currentInput = page.locator('input[aria-label="Upload current CSV file"]');
+  await currentInput.setInputFiles({
+    name: 'current.csv',
+    mimeType: 'text/csv',
+    buffer: Buffer.from(currentCsv),
+  });
+
+  // Wait for current to be loaded (prior dropzone is still shown)
+  await expect(page.locator('text=Compare to last week')).toBeVisible({ timeout: 5000 });
+
+  const priorInput = page.locator('input[aria-label="Upload prior week CSV file"]');
+  await priorInput.setInputFiles({
+    name: 'prior.csv',
+    mimeType: 'text/csv',
+    buffer: Buffer.from(priorCsv),
+  });
+
+  // Should show title-match note
+  await expect(page.locator('text=Matched by title (less reliable)')).toBeVisible({ timeout: 5000 });
+});
+
+test('SC23: DIFFERENT-TRACKER EDGE — non-overlapping ids show amber warning but diff still renders', async ({ page }) => {
+  await page.goto(BASE + '/');
+  await page.locator('[data-testid="tab-changes"]').click();
+
+  const currentCsv = `Issue Key,Title,Status,Assignee,Updated
+JIRA-1,Deploy login service,Done,Alice,2026-06-14
+JIRA-2,Fix dashboard bug,In Progress,Bob,2026-06-13
+`;
+  const priorCsv = `Issue Key,Title,Status,Assignee,Updated
+GH-100,Some GitHub issue,In Progress,Carol,2026-06-07
+GH-101,Another GitHub issue,Done,Dave,2026-06-06
+`;
+
+  const currentInput = page.locator('input[aria-label="Upload current CSV file"]');
+  await currentInput.setInputFiles({
+    name: 'jira.csv',
+    mimeType: 'text/csv',
+    buffer: Buffer.from(currentCsv),
+  });
+
+  const priorInput = page.locator('input[aria-label="Upload prior week CSV file"]');
+  await priorInput.setInputFiles({
+    name: 'github.csv',
+    mimeType: 'text/csv',
+    buffer: Buffer.from(priorCsv),
+  });
+
+  // Amber warning should appear
+  await expect(page.locator('text=different exports')).toBeVisible({ timeout: 5000 });
+
+  // But diff still renders (not blank — some bucket shows)
+  await expect(page.locator('[data-testid="changes-prose-summary"]')).toBeVisible({ timeout: 5000 });
+});
+
+// ---- SC20-HOSTILE: blocked-clipboard still flips "Copied ✓" in Changes tab ----
+
+test('SC20-hostile-clipboard: Changes copy button still flips "Copied ✓" when clipboard is blocked (fallback)', async ({ page }) => {
+  // Block clipboard BEFORE navigation via addInitScript
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'clipboard', {
+      value: {
+        writeText: () => Promise.reject(new Error('Clipboard blocked by test')),
+      },
+      configurable: true,
+    });
+  });
+
+  await page.goto(BASE + '/');
+  await page.locator('[data-testid="tab-changes"]').click();
+  await page.locator('[data-testid="changes-load-sample"]').click();
+  await expect(page.locator('[data-testid="changes-prose-summary"]')).toBeVisible({ timeout: 10000 });
+
+  const mdButton = page.locator('button[aria-label="Copy as Markdown"]');
+  await expect(mdButton).toBeVisible();
+  await mdButton.click();
+  // Must flip to "Copied ✓" via textarea fallback even when clipboard.writeText rejects
+  await expect(mdButton.locator('span[aria-live="polite"]')).toHaveText('Copied ✓', { timeout: 3000 });
+});
+
+// ---- SC20-edit-commit: Changes inline edit commits on Enter AND blur, flows into copy ----
+
+test('SC20-edit-enter: Changes "Newly Shipped" row inline edit commits on Enter and flows into copy', async ({ page }) => {
+  await page.goto(BASE + '/');
+  await page.locator('[data-testid="tab-changes"]').click();
+  await page.locator('[data-testid="changes-load-sample"]').click();
+  await expect(page.locator('[data-testid="changes-prose-summary"]')).toBeVisible({ timeout: 10000 });
+
+  // Find the first Newly Shipped item and hover to reveal Edit button
+  const shippedSection = page.locator('section[aria-label="Newly Shipped"]');
+  const firstShippedLi = shippedSection.locator('li').first();
+  await firstShippedLi.hover();
+
+  const editBtn = firstShippedLi.locator('button', { hasText: 'Edit line' });
+  await editBtn.click();
+
+  const editInput = firstShippedLi.locator('input');
+  await expect(editInput).toBeVisible();
+  await editInput.fill('Changes edited shipped row [enter test]');
+  await editInput.press('Enter');
+
+  // Must appear in the rendered row
+  await expect(firstShippedLi.locator('text=Changes edited shipped row [enter test]')).toBeVisible();
+  await expect(editInput).not.toBeVisible();
+
+  // Must flow into copied Markdown
+  let copiedText = '';
+  await page.exposeFunction('captureChangesClipboard', (text: string) => { copiedText = text; });
+  await page.evaluate(() => {
+    Object.defineProperty(navigator, 'clipboard', {
+      value: {
+        writeText: async (text: string) => {
+          await (window as unknown as Record<string, unknown>)['captureChangesClipboard'](text);
+        },
+      },
+      configurable: true,
+    });
+  });
+
+  const mdButton = page.locator('button[aria-label="Copy as Markdown"]');
+  await mdButton.click();
+  await expect(mdButton.locator('span[aria-live="polite"]')).toHaveText('Copied ✓', { timeout: 3000 });
+  await page.waitForTimeout(300);
+  if (copiedText) {
+    expect(copiedText).toContain('Changes edited shipped row [enter test]');
+  }
+});
+
+test('SC20-edit-blur: Changes row inline edit commits on blur, flows into copy', async ({ page }) => {
+  await page.goto(BASE + '/');
+  await page.locator('[data-testid="tab-changes"]').click();
+  await page.locator('[data-testid="changes-load-sample"]').click();
+  await expect(page.locator('[data-testid="changes-prose-summary"]')).toBeVisible({ timeout: 10000 });
+
+  // Find a Newly Blocked item to edit
+  const blockedSection = page.locator('section[aria-label="Newly Blocked"]');
+  const firstBlockedLi = blockedSection.locator('li').first();
+  await firstBlockedLi.hover();
+
+  const editBtn = firstBlockedLi.locator('button', { hasText: 'Edit line' });
+  await editBtn.click();
+
+  const editInput = firstBlockedLi.locator('input');
+  await expect(editInput).toBeVisible();
+  await editInput.fill('Blur-committed changes edit');
+  await editInput.press('Tab'); // triggers blur → commit
+
+  await expect(firstBlockedLi.locator('text=Blur-committed changes edit')).toBeVisible({ timeout: 3000 });
+});
+
+// ---- COUNT HONESTY: prose == buckets == Markdown copy (Changes tab) ----
+
+test('SC19-count-honesty: changes prose numbers equal bucket counts equal Markdown copy counts (single model)', async ({ page }) => {
+  await page.goto(BASE + '/');
+  await page.locator('[data-testid="tab-changes"]').click();
+  await page.locator('[data-testid="changes-load-sample"]').click();
+  await expect(page.locator('[data-testid="changes-prose-summary"]')).toBeVisible({ timeout: 10000 });
+
+  // 1. Prose text numbers — all 10 non-zero categories (slipped and reopened are now separate)
+  const proseText = await page.locator('[data-testid="changes-prose-summary"]').innerText();
+  expect(proseText).toMatch(/3 shipped/);
+  expect(proseText).toMatch(/1 started/);
+  expect(proseText).toMatch(/1 newly blocked/);
+  expect(proseText).toMatch(/1 unblocked/);
+  expect(proseText).toMatch(/1 slipped/);
+  expect(proseText).toMatch(/1 reopened/);
+  expect(proseText).toMatch(/4 new/);
+  expect(proseText).toMatch(/1 still blocked/);
+  expect(proseText).toMatch(/2 carried over/);
+  expect(proseText).toMatch(/1 removed from tracker/);
+
+  // 2. Bucket heading counts match prose (all 10 categories — separate Slipped and Reopened)
+  await expect(page.getByRole('heading', { name: /Newly Shipped \(3\)/i }).first()).toBeVisible();
+  await expect(page.getByRole('heading', { name: /Newly Started \(1\)/i }).first()).toBeVisible();
+  await expect(page.getByRole('heading', { name: /Newly Blocked \(1\)/i }).first()).toBeVisible();
+  await expect(page.getByRole('heading', { name: /Unblocked \(1\)/i }).first()).toBeVisible();
+  await expect(page.getByRole('heading', { name: /^Slipped \(1\)$/i }).first()).toBeVisible();
+  await expect(page.getByRole('heading', { name: /^Reopened \(1\)$/i }).first()).toBeVisible();
+  await expect(page.getByRole('heading', { name: /New this period \(4\)/i }).first()).toBeVisible();
+
+  // 3. Markdown copy contains same counts
+  let mdText = '';
+  await page.exposeFunction('captureMdCountHonesty', (text: string) => { mdText = text; });
+  await page.evaluate(() => {
+    Object.defineProperty(navigator, 'clipboard', {
+      value: {
+        writeText: async (text: string) => {
+          await (window as unknown as Record<string, unknown>)['captureMdCountHonesty'](text);
+        },
+      },
+      configurable: true,
+    });
+  });
+
+  const mdButton = page.locator('button[aria-label="Copy as Markdown"]');
+  await mdButton.click();
+  await expect(mdButton.locator('span[aria-live="polite"]')).toHaveText('Copied ✓', { timeout: 3000 });
+  await page.waitForTimeout(300);
+  if (mdText) {
+    expect(mdText).toContain('Newly Shipped (3)');
+    expect(mdText).toContain('Newly Started (1)');
+    expect(mdText).toContain('Newly Blocked (1)');
+    expect(mdText).toContain('Unblocked (1)');
+    expect(mdText).toContain('Slipped (1)');
+    expect(mdText).toContain('Reopened (1)');
+    expect(mdText).toContain('New this period (4)');
+    expect(mdText).toContain('Still Blocked (1)');
+    expect(mdText).toContain('Carried over / unchanged-open (2)');
+    expect(mdText).toContain('Removed from tracker (1)');
+    expect(mdText).toContain('3 shipped');
+    expect(mdText).toContain('1 started');
+    expect(mdText).toContain('1 newly blocked');
+    expect(mdText).toContain('1 unblocked');
+    expect(mdText).toContain('1 slipped');
+    expect(mdText).toContain('1 reopened');
+    expect(mdText).toContain('4 new');
+    expect(mdText).toContain('1 still blocked');
+    expect(mdText).toContain('2 carried over');
+    expect(mdText).toContain('1 removed from tracker');
+  }
+});

@@ -1,26 +1,46 @@
-# Round 1 — Rob
+# StandupDigest — Round 1 — Rob (Brand/visual designer, freelance) — NON-FIT
 
-Freelance brand/visual designer. Figma, Illustrator, Photoshop, client Slacks. Solo — no team, no tracker export, no weekly status to compile. Honestly a non-fit; I'd never land here in my real day.
+Persona note: solo freelance designer. No team, no tracker, no weekly team-status report to
+compile. I'd never land here in a real workflow. Tested honestly anyway.
 
-## (1) CLARITY — Yes
-Inside 5s I got it. The headline "Turn your tracker export into a weekly status — in seconds" plus "Drop a Jira, Linear, Asana, or GitHub CSV. Get a Shipped / In Progress / Blocked digest ready to paste into Slack" is dead clear about what AND who. And "Your file never leaves your browser — no upload, no signup" is right there under the dropzone — exactly the line that earns trust. Clean, no clutter. Credit where due: this is a well-labeled landing.
+## Q1 — First reaction, would I use it for my actual work?
+Landing read in 5 seconds: "Turn your tracker export into a weekly status." Subhead: "Drop a
+Jira, Linear, Asana, or GitHub CSV ... paste into Slack." I knew in two seconds this is a dev/PM
+tool, and equally fast that it's not for me. I don't export a Jira/Linear CSV — I push pixels in
+Figma and Photoshop. There is no "weekly team status" in my world; my weekly grunt work is
+resizing assets and prepping exports for clients, which this does nothing for. So: clear, but a
+hard no for my actual work. Honest zero motivation, exactly as expected.
 
-## (2) VALUE — No (for me)
-Not my job, full stop. I don't export trackers and I don't write a team status — I'm one person making logos and decks. Nothing here touches asset prep, color, or layout. For what I DO compare everything to ("I could do this in Photoshop in 4 minutes"), there's no overlap at all. So for my real work: zero use. Said plainly because the brief asked: this is not for me, and the app is honest enough that I knew that in about 8 seconds. That's actually a point in its favor — it didn't waste my time pretending.
+## Q2 — The ONE thing stopping me from advocating
+It solves a problem I (and most freelance designers) simply don't have. Nothing the app could do
+better changes that — it's an audience mismatch, not a quality gap. If I imagine forwarding it,
+the only person who'd thank me is a friend who runs eng standups, and I'd have to remember they
+exist mid-conversation. That's the ceiling.
 
-If I imagine the eng/PM friend it IS for, it looks genuinely useful: sample data loaded instantly, grouped Shipped/In Progress/Blocked, regroups by Assignee or Epic, an "UNMAPPED STATUS" bucket that smartly catches a weird "Needs Triage Review" status with Move-to buttons, inline "Edit line," and Copy Markdown / Copy plain text both producing real text. That's a tight one-session tool.
+## Q3 — Is the output trustworthy and copy-ready?
+Yes — and I checked carefully. On the Changes tab I clicked "Load sample data" (loads current +
+prior week in one click, nice). Prose summary: "Since last week: 3 shipped, 1 newly blocked, 2
+slipped, 4 new." Every count is honest:
+- Headers match prose: Newly Shipped (3), Newly Blocked (1), Slipped/Reopened (2), New (4). ✓
+- Each header count equals the rows shown, including collapsed sections (Still Blocked 1=1,
+  Carried-over 2=2, Removed 1=1, Unblocked 1=1, Newly Started 1=1). ✓
+- Copied Markdown AND plaintext both match the on-screen rows and counts exactly. ✓
+The Markdown is clean (## headers, - bullets, owner in parens) and the plaintext uses • bullets —
+both genuinely paste-ready for Slack/Notion. Weekly Status tab still works (Shipped 5 / In Progress
+4 / Blocked 2 / Backlog 3). No count mismatch anywhere.
 
-## (3) ADVOCACY — 4
-Not 0, because it's clean, works, and I have eng/PM peers in client Slacks I could plausibly forward it to. Not higher, because I have no firsthand experience of the pain — I can't vouch for whether the parsing handles their real messy Jira export, and a recommendation I can't stand behind isn't a real recommendation. I wouldn't bring it up unprompted.
+One cosmetic glitch (not a data bug): on a 1440px desktop, the "Copy Markdown / Copy plain text"
+button bar renders floating in the MIDDLE of the digest — overlapping the Slipped/Reopened section
+(the "(Dave)" row appears below the buttons) instead of sitting at the bottom. It works, but it
+looks broken and would make a buyer hesitate. Worth fixing.
 
-## Hesitation / bugs / confusion
-- No bugs. No console errors. Copy verified: "Copy Markdown" wrote real digest text to clipboard. Epic/Assignee toggle regroups correctly.
-- Minor: the digest header is plain text but I wasn't sure if the "Edit line" edits flow into the copied output — didn't confirm that round-trips.
-- The ► glyph next to the Group-by row is ambiguous; unclear if it's a control or decoration.
-
-## ONE thing that would raise my score
-Nothing realistic — I'm the wrong user. The only thing that would move MY number is the thing it correctly isn't: a designer's asset-prep tool. For its actual audience, a live "see it work on YOUR file" reassurance would make me confident enough to forward it.
+## Scores
+ADVOCACY: 2/10 — well-built and trustworthy, but a tool for an audience I'm not in. The +2 over 0
+is purely "I could name one eng friend." Not unprompted recommendation territory.
+VALUE: No — my weekly grunt work is asset prep in Photoshop, not compiling team status. Zero overlap.
+CLARITY: Yes — I understood what it is and who it's for within 5 seconds; the Jira/Slack copy made
+the audience unmistakable (and unmistakably not me).
 
 ```json
-{"tester": 0, "round": 1, "clarity": "Yes", "value": "No", "advocacy": 4, "topComplaints": ["Total non-fit: solo designer has no tracker export and no team status to write", "Can't vouch for parsing on real-world messy exports having never felt the pain", "Unclear whether inline 'Edit line' edits carry into the copied output"], "priorConcernsAddressed": "n/a"}
+{"tester": 1, "round": 1, "clarity": "Yes", "value": "No", "advocacy": 2, "topComplaints": ["Audience mismatch: freelance designers have no team tracker or weekly status to compile", "Cosmetic: Copy Markdown/plain-text button bar renders mid-digest overlapping the Slipped/Reopened section on desktop"], "priorConcernsAddressed": "n/a"}
 ```

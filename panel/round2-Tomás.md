@@ -1,30 +1,49 @@
-# Tomás — Round 2
+# Round 2 — Tomás (Ops analyst, Excel/Jira/Tableau, Edge, wary of pasting company data)
 
-Ops analyst, Edge on a locked-down corporate laptop. Round 1 I gave clarity Yes / value Yes / advocacy 8. My only blocker to 9–10 was the sticky Copy bar rendering mid-digest with text bleeding under it — looked unfinished. Minor nag: "paste into Slack" in a Teams shop.
+## Round-1 recap
+R1: ADVOCACY 8, Value=Yes, Clarity=Yes. Held at 8 by (a) couldn't trust categorization on MY
+messy real Jira export; (b) "Slipped / Reopened" merges two distinct events into one count.
+I did NOT cite the copy-bar overlap (that was others' complaint; I verified counts cleanly).
 
-## Prior concerns — RESOLVED? YES (the blocker), PARTIAL (the nag)
-- STICKY BAR: **Fixed.** Computed bg is now opaque (near-white), bottom:0. Scrolled to the very bottom with sample data AND my own CSV: BLOCKED, BACKLOG / TO DO, and UNMAPPED STATUS are all fully visible above the bar; the "Move to…" dropdown on the unmapped item is readable. Mid-scroll, the row behind the bar ("Deploy staging environment") is cleanly cut off by the opaque background — NO text bleed-through, no buttons jammed between sections. This is exactly the polish I wanted. (Note: a full-page screenshot still shows the bar mid-doc, but that's a screenshot artifact of position:sticky — the lived viewport experience is correct.)
-- SLACK→TEAMS: **Partial.** Landing subtitle still reads "ready to paste into **Slack**." Once data loads the word Slack disappears from the digest, and plain-text copy pastes fine into Teams. Still momentarily reads as not-quite-for-me on the cold open. Two-word fix ("Slack/Teams").
+## Re-check of the panel fixes (Changes tab, sample data)
 
-## New features — exercised
-- Week filter: three options ("Week of Mon 8 Jun…", an older week, "All dates"), defaults to most recent week. Switching to All dates recomputes prose and keeps carry-over visible. Good.
-- Grouping Assignee↔Epic toggles.
-- Remap columns: persistent panel, five dropdowns (Title/Summary, Status, Assignee, Epic/Group, Updated/Resolved Date). This directly answers my r1 worry about messy custom-column exports.
-- Inline edit: each digest line focuses an editable input on click. Works.
-- Copy fidelity: Markdown = H2 sections / H3 assignees, week-prose header, `[carry-over]` tag preserved, unmapped item kept with raw status. Plain text = clean bullets, indented assignees — paste-ready for Teams. "Copied ✓" turns green. (Clipboard read worked in my test env; not blocked.)
+1. Copy-bar pinning — FIXED, and it was never my blocker but it's clean now. Pinned bottom-0,
+   floats over whitespace. Last row "Deprecate legacy API (Bob)" sits clearly ABOVE the bar,
+   no overlap. Verified desktop (1280px) AND mobile (375px) — same clean gap on both.
 
-## My-own-data test (the r1 open question)
-Uploaded a messy Jira export: commas inside summaries, sub-task rows, custom "Issue Type" column, accented name. Result: comma summary intact, "In Review"→In Progress, "Needs Triage Review"→Unmapped (not dropped), "Tomás" accent preserved. **ZERO external requests** — confirmed nothing left the browser on my real data. That is the whole reason this clears IT for me.
+2. Prose summary completeness — FIXED. Now reads ALL nine non-zero categories:
+   "Since last week: 3 shipped, 1 started, 1 newly blocked, 1 unblocked, 2 slipped, 4 new,
+   1 still blocked, 2 carried over, 1 removed from tracker." No longer truncated to 4.
 
-## (1) CLARITY — Yes
-Same as r1: headline + "Your file never leaves your browser — no upload, no signup" name my chore and my hard requirement instantly.
+3. COUNT HONESTY — verified clean, end to end. Prose header == section header counts == rows
+   shown == copied Markdown == copied plain text. The two collapsed sections (Carried over 2,
+   Still Blocked 1) expand correctly into the copied output with the exact bullet count their
+   header claims. Markdown and plaintext are content-identical. This is the thing I trust most.
 
-## (2) VALUE — Yes
-Replaces my Friday Excel pivot. Saves 20–30 min/week. Remap + week filter make it usable on real exports, not just clean samples.
+4. Weekly Status tab — NO regression. "shipped 5, 4 in progress, 2 blocked, 1 carried over"
+   and the SHIPPED(5)/IN PROGRESS(4)/BLOCKED(2) rows match exactly. Group-by, week filter,
+   remap, copy all present and working.
 
-## (3) ADVOCACY — 9/10
-The blocker that capped me at 8 is gone, verified on sample and my own data, with zero network egress. I'd bring this up to my analyst peers unprompted now. Held off 10 only by the lingering "paste into Slack" line on the cold open — a Teams shop reads that as a small "is this for me?" stumble. Fix that wording and it's a 10.
+## My own held-back concerns — honest weigh-in
+- **Slipped / Reopened still merges two events into one count.** UNTOUCHED. A "slipped"
+  (rolled over, missed) and a "reopened" (was done, came back) are different stories I report
+  differently to stakeholders. Bucketing them together still forces me to manually split the
+  2 items. This was my real #2 and it stands.
+- **Trust on MY messy real export** — still can't prove it without uploading my own Jira CSV,
+  which the panel can't give me. BUT: the "never leaves your browser / no upload, no signup"
+  line + perfect count honesty on the sample lowers my risk to "I'd try it on a real export
+  next Monday." The remap-columns control suggests it'll handle non-standard headers. Lower
+  weight than R1 — count honesty earned that.
 
-```json
-{"tester": 4, "round": 2, "clarity": "Yes", "value": "Yes", "advocacy": 9, "topComplaints": ["Landing subtitle still says 'ready to paste into Slack' — Teams shop reads it as not-for-me on cold open", "Full-page export of the digest still visually places the sticky bar mid-doc (screenshot artifact, not a real in-app bug)"], "priorConcernsAddressed": "all"}
-```
+## Verdict
+The fixes shipped what was promised and broke nothing. They didn't touch my two concerns, but
+one (trust) is partly bought down by demonstrated count honesty + the no-upload promise. The
+Slipped/Reopened merge is a genuine fidelity gap for stakeholder reporting and is what keeps me
+from a 9 — I'd still hand-edit those rows. I'm a strong 8: I'd recommend it to a fellow analyst
+unprompted, with the one caveat.
+
+ADVOCACY: 8/10  (R1 8 -> R2 8, held — not the copy bar; the Slipped/Reopened merge)
+VALUE: Yes (replaces ~30 min of hand-rolling a weekly status in Excel from a Jira export)
+CLARITY: Yes (hero + "no upload, no signup" tell me what it is and that it's safe in <30s)
+
+{"tester":"Tomás","round":2,"clarity":"Yes","value":"Yes","advocacy":8,"blockerResolved":true,"residual":"Slipped/Reopened still merges two distinct events into one count; real-messy-export trust unprovable without my own CSV (partly offset by verified count honesty + no-upload)"}

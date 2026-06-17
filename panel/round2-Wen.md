@@ -1,31 +1,45 @@
-# Wen — Round 2
+# Round 2 — Wen (Marketing data analyst; CSV in/out; count-honesty hawk)
 
-**Persona:** Marketing data analyst, lives in CSV/BigQuery/Looker, distrusts invisible transforms. IN-AUDIENCE.
+R1 verdict: advocacy 8, Value=Yes, Clarity=Yes. One blocker held me off a 9: the
+Copy bar rendered MID-LIST overlapping digest rows in the collapsed Changes view, and
+the prose one-liner named only 4 of 9 buckets.
 
-## Round-1 blocker — RESOLVED (yes, fully)
-I rebuilt my exact `weird.csv` (`Task Name,Owner,State`, Title NOT named "Title") and uploaded it.
-- **Amber "Map your columns" banner AUTO-OPENED** on partial detection: "We couldn't auto-detect which columns are which — pick them below so your digest is accurate." This is the transparency I demanded.
-- Status auto-detected from "State", Assignee from "Owner" — but **Title is shown as `(none)` and I'm forced to pick it.** No silent "(untitled)" without warning. After I mapped Title→Task Name and clicked Apply, rows rendered correctly ("Migrate analytics pipeline to dbt", "Refactor GA4 export job"). "(untitled)" gone.
-- **"Remap columns" link is ALWAYS visible** post-load (verified after sample data AND after the weird CSV). I can reopen the mapper anytime.
-- **False "All statuses recognized ✓" is GONE** on partial detection — confirmed absent in DOM.
-- **Phantom "(Bob)" is GONE.** The unmapped-status row "Audit accessibility issues" (Owner=Bob in CSV) shows NO assignee on screen AND none in copied Markdown. Copy === screen.
+## What I checked (Changes tab, "Load sample data", desktop 1440 + mobile 375)
 
-## Other features exercised
-- Sample data: copied Markdown AND plain text both match the on-screen digest EXACTLY — epic grouping honored, "[carry-over]" flag preserved, no fabricated owners.
-- Week filter: real options (specific week / "All dates") drive correct counts in the prose line.
-- Grouping toggle Assignee↔Epic works.
-- UNMAPPED STATUS bucket with "Move to…" still present — still asks instead of guessing. This remains the behavior that earns my trust.
+**Fix (a) — Copy bar overlap.** RESOLVED. Container computed `position: fixed; bottom: 0px`.
+Scrolled to the bottom of the tall digest: the bar sits below the last row (REMOVED FROM
+TRACKER → "Deprecate legacy API (Bob)") with whitespace clearance. `elementFromPoint` 6px
+above the bar = the bar's own wrapper DIV, NOT a digest row. `elementFromPoint` at button
+center = SPAN inside the button — buttons are hittable, not covered. Verified identically on
+mobile 375px (both buttons visible, no overlap with "Deprecate legacy API"). The "looks broken
+on first glance" problem is gone.
 
-## The three answers
-- **CLARITY — Yes.** Same legible H1 + Jira/Linear/Asana/GitHub subline + "never leaves your browser, no signup."
-- **VALUE — Yes.** Today I hand-build this from a Jira CSV in Sheets (pivot + manual prose) every Friday. This buckets, groups by assignee/epic, flags carry-over, writes the prose, and the copy is Slack-ready and provably faithful to the data. The non-standard-header path is now safe for real exports.
-- **ADVOCACY — 9.** My round-1 trust gap is closed. I'd bring this up unprompted to my marketing-ops peers. Holding it back from a 10: see residual below.
+**Fix (b) — prose completeness.** RESOLVED. Summary now reads, byte-for-byte:
+"Since last week: 3 shipped, 1 started, 1 newly blocked, 1 unblocked, 2 slipped, 4 new,
+1 still blocked, 2 carried over, 1 removed from tracker." All 9 non-zero categories named.
 
-## Residual hesitations (minor, not blockers)
-- No CSV-OUT. I'm a "CSV in/out everywhere" person; I can copy MD/text but can't re-export the categorized rows as a CSV to diff against my source in Sheets. That's the one thing between 9 and 10 for me.
-- I'd like the banner to name WHICH column it couldn't detect (it says "which columns are which" generically); minor polish.
-- (Test-env note: the Copy button needed a DOM-dispatched click in headless due to a sticky-bar pointer overlay — copy output was correct and faithful; this is my environment, NOT an app regression.)
+## Count honesty (my specialty) — AIRTIGHT
+Cross-checked prose vs on-screen badges vs copied Markdown vs copied plaintext:
+- Every section header count == actual rows: Shipped 3, NewBlocked 1, Slipped 2, New 4,
+  Unblocked 1, Started 1, StillBlocked 1, Carried 2, Removed 1. Zero mismatches. Total 16 rows.
+- Markdown == plaintext after normalizing only the bullet glyph (`-` vs `•`) and `##` headers.
+  Same rows, same order, same prose first line. Nothing silently dropped.
+- IMPORTANT: the collapsed sections (Carried Over, Still Blocked) hide their BODIES on screen
+  but the rows are STILL present in both copy outputs and the counts match the badges. No silent
+  mis-bucketing, no dropped rows behind a collapse. Exactly what I distrust tools for — clean here.
 
-```json
-{"tester": 3, "round": 2, "clarity": "Yes", "value": "Yes", "advocacy": 9, "topComplaints": ["No CSV export of the categorized rows — can't diff output against source in Sheets", "Mapping banner doesn't name which specific column failed to detect"], "priorConcernsAddressed": "all"}
-```
+**Weekly Status tab:** no regression. Loads sample, group-by Assignee/Epic, week selector,
+prose summary ("shipped 5, 4 in progress, 2 blocked, 1 carried over"), SHIPPED (5) rows present.
+
+## Verdict
+The blocker is GONE and the prose is complete. The single thing that capped me at 8 is fixed,
+and the count-honesty I most care about holds byte-for-byte across all four representations.
+This is now a tool I'd paste a Jira export into for my weekly stakeholder status without
+re-checking the math. Minor residual (not a blocker): collapsed sections require a click to see
+bodies, and "Edit line" affordances add visual noise — but counts are honest and copy is complete.
+
+CLARITY: Yes. VALUE: Yes (today I hand-bucket a Jira CSV in Sheets; this is seconds, CSV in,
+markdown/plaintext out, math verified). ADVOCACY: 9 (R1 8 → R2 9). I'd bring this up unprompted
+to anyone who writes a weekly status from a tracker export.
+
+{"tester":"Wen","round":2,"clarity":"Yes","value":"Yes","advocacy":9,"blockerResolved":true,"residual":"collapsed sections need a click to reveal bodies; counts/copy unaffected"}

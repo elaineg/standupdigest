@@ -1,26 +1,50 @@
-# Round 1 — Marcus
+# StandupDigest — Round 1 — Marcus (Frontend eng, 2yr; NON-FIT audience)
 
-Frontend eng, high-tech, desktop Chrome + devtools. NON-FIT: I report up, not down — I don't aggregate a team's status. Tested out of early-adopter curiosity.
+## Cold open (5s reaction)
+H1: "Turn your tracker export into a weekly status — in seconds." Subtext names Jira/Linear/
+Asana/GitHub CSV, "ready to paste into Slack," "no upload, no signup." I get it instantly —
+CSV in, Slack-pasteable status out. Clean, no jank, no console errors. As an early adopter I'd
+stay and poke it. The "no signup, stays in your browser" line is the right flex.
 
-## (1) CLARITY — Yes
-Within 5s I got it: headline "Turn your tracker export into a weekly status — in seconds", subhead names Jira/Linear/Asana/GitHub and the Shipped/In Progress/Blocked output, dropzone says "Your file never leaves your browser — no upload, no signup." Privacy + no-signup is stated, unambiguous. Clean, legible, no clutter.
+## Did I find + use the Changes tab?
+Yes — three tabs, discovered "Changes" immediately. Its "Load sample data" loads BOTH current
+and prior-week in one click as promised. Output rendered with the full taxonomy: Newly Shipped,
+Newly Blocked, Slipped/Reopened, New this period, Unblocked, Newly Started, collapsible Carried-
+over + Still-blocked, and an italic "Removed from tracker" list. Nice touch: "[blocked 2+ wks]"
+tag on a still-blocked item.
 
-## (2) VALUE — No (for me) / the engine itself is solid
-For my real job: No. I don't run team standups; I'd never open this on a recurring basis. Honest non-fit, not a knock on craft.
-On the sample data it's genuinely good: prose one-liner ("shipped 5, 4 in progress, 2 blocked, 1 carried over"), carry-over pill, assignee↔epic grouping toggle, an UNMAPPED STATUS bucket with a "Move to…" dropdown for unrecognized statuses (nice touch), and both Copy Markdown and Copy plain text produce clean paste-ready output with `[carry-over]` preserved. Clipboard worked, label flips to "Copied ✓".
+## Count / trust verification (the important part)
+Counts FULLY reconcile. Prose summary "Since last week: 3 shipped, 1 newly blocked, 2 slipped,
+4 new." matches every section header (Newly Shipped 3, Newly Blocked 1, Slipped 2, New 4) AND
+matches the copied Markdown exactly. I copied both formats and inspected:
+- Markdown copy: complete, well-formed, all 9 sections incl. "Removed from tracker (1)".
+- Plaintext copy (772 chars): also complete, includes Removed section, bullet style.
+No count mismatch anywhere. This is trustworthy — I'd paste it without re-checking. That earns
+real points; a digest tool that lies about counts is dead on arrival.
 
-## Bugs / confusion
-- REAL: GitHub Issues support is weaker than the landing page implies. I fed a realistic GH export (State=open/closed + Labels incl. `blocked`). Every `open` issue got dumped into BACKLOG/TO DO, nothing landed In Progress, and an issue labeled `blocked` was NOT flagged Blocked — the parser keys off a status column and ignores labels. GitHub's open/closed+labels model doesn't map cleanly, so the digest came out wrong for my actual data. No error, just silently mis-bucketed → "All statuses recognized ✓" gave false confidence.
-- MINOR data wobble: sample "Audit accessibility issues" (unmapped) shows NO assignee in the UI but `(Bob)` in the copied Markdown/plain text. Inconsistent.
-- NOT a bug (retracted): the Copy bar looks like it floats mid-digest in a full-page screenshot — it's `sticky bottom-0`, intended behavior. Fine.
-- Craft: clean Tailwind, zero console errors, good spacing/typography. No jank.
+## Weekly Status regression check
+Original tab still works — sample loads, "shipped 5 / 4 in progress / 2 blocked / 1 carried"
+summary, group-by Assignee/Epic, week selector. No JS errors, no regression.
 
-## (3) ADVOCACY — 5/10
-The Jira/Linear path looks slick enough that I'd maybe drop it in Slack with a "nice for whoever runs standups." But it's not for me (no recurring need), and the GitHub path — the one an engineer like me would actually try — mis-bucketed my data without warning. That caps it.
+## Q1 — First reaction + use it for my work?
+Slick and it works. But for MY job: I report UP to a lead, I don't aggregate a team's status,
+and I don't keep a Jira/Linear export handy. The "diff since last week" framing is genuinely the
+most interesting tab — I could imagine pointing it at a GitHub Issues export out of curiosity —
+but I have no recurring need. A team lead or EM is the real user, not me.
 
-## ONE thing to raise the score
-Make GitHub Issues actually work: map open/closed sensibly and read `blocked`/status from Labels, not just a status column — and surface a "we guessed these mappings, review them" prompt instead of a silent "All statuses recognized ✓".
+## Q2 — The ONE thing stopping advocacy
+Nothing's broken — it's audience fit. I'd only forward it to my EM in Slack, not adopt it. Minor
+polish nit: the sticky Copy bar overlaps the digest rows mid-scroll on a tall result, which looks
+janky on first load (it IS position:sticky, so functional, just visually messy until you scroll).
+
+## Q3 — Output trustworthy + copy-ready?
+Yes. Counts match rows AND match both copied formats. Markdown pastes clean into Slack/Notion.
+This is the strongest part of the app.
+
+ADVOCACY: 6
+VALUE: Marginal  (no recurring need of my own; I report up, not down — real value is for a lead)
+CLARITY: Yes
 
 ```json
-{"tester": 0, "round": 1, "clarity": "Yes", "value": "No", "advocacy": 5, "topComplaints": ["GitHub Issues export silently mis-bucketed: open->Backlog, `blocked` label ignored, no In Progress", "False-confidence 'All statuses recognized ✓' on data it actually mapped wrong", "Unmapped item shows no assignee in UI but (Bob) in copied output"], "priorConcernsAddressed": "n/a"}
+{"tester": "Marcus", "round": 1, "clarity": "Yes", "value": "Marginal", "advocacy": 6, "topComplaints": ["No recurring need for me — I report up, not aggregate a team (audience non-fit)", "Sticky Copy bar visually overlaps digest rows mid-scroll on a tall result — looks janky on first load"], "priorConcernsAddressed": "n/a"}
 ```

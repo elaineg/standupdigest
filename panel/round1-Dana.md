@@ -1,24 +1,50 @@
-# Round 1 — Dana
+# StandupDigest — Round 1 — Dana (Demand-gen marketer, IN-AUDIENCE)
 
-**Persona:** Demand-gen lead, runs a small team in Asana, owes a weekly stakeholder status. Ruthless about time.
+5-sec reaction: "Turn your tracker export into a weekly status — in seconds" + "Drop a Jira,
+Linear, Asana, or GitHub CSV." It names Asana, names the output (Shipped/In Progress/Blocked),
+says no upload/no signup. That's my exact weekly chore. I stayed.
 
-## (1) CLARITY — Yes
-Within 5s I got it. Headline "Turn your tracker export into a weekly status — in seconds." plus "Drop a Jira, Linear, Asana, or GitHub CSV. Get a Shipped / In Progress / Blocked digest ready to paste into Slack." nails what + who. And "Your file never leaves your browser — no upload, no signup." is right under the dropzone — exactly the line that makes me trust dropping a work export. No login wall, no ask for my email. 
+## Discovering the Changes tab
+Found "Changes" as the 3rd tab unprompted. Clicked it → "Changes since last week" with an
+optional last-week dropzone and a "Load sample data" button that loads BOTH current + prior
+in one click. Worked first try, no errors.
 
-## (2) VALUE — Yes
-Today I export my Asana board, then hand-massage it in Notion/Canva into a status nobody asked to be pretty. This kills that. I uploaded my OWN Asana-style CSV (Done/In Progress/Blocked/To Do, real teammates) and it parsed cleanly: mapped Done→Shipped, grouped by assignee, flagged "All statuses recognized ✓". The prose summary line ("shipped 2, 2 in progress, 1 blocked") is literally my opening sentence to stakeholders. Copy Markdown AND Copy plain text both worked — Markdown is Slack/Notion-ready, plain text for email. Toggling Assignee↔Epic grouping is genuinely useful (assignee for my 1:1s, epic for the exec roll-up). Carry-over flag and the "Move to…" for an unmapped status are thoughtful — that's the messy-real-data stuff that usually breaks these tools. This saves me ~20 min every Friday.
+## Trust check (the part that matters to me)
+Prose summary: "Since last week: 3 shipped, 1 newly blocked, 2 slipped, 4 new."
+On-screen section headers: NEWLY SHIPPED (3), NEWLY BLOCKED (1), SLIPPED/REOPENED (2),
+NEW THIS PERIOD (4) — ALL MATCH the prose. Every header count = number of rows shown.
+Copied Markdown AND plaintext: counts and rows identical to the screen, owners in parens,
+"[blocked 2+ wks]" flag preserved, Removed-from-tracker list present. No mismatch anywhere.
+This is the first status tool I've trusted on counts without re-counting by hand.
+(Copy verified via clipboard read; sticky copy bar pinned to bottom of viewport — the
+mid-page overlap I first saw was only a full-page-screenshot artifact, not a real bug.)
 
-## (3) ADVOCACY — 8/10
-I'd screenshot this into our team channel. Holds it back from 9: it's a per-export tool — I still have to manually export from Asana each week (no saved view/recurrence), and the digest is a snapshot, not a "last week vs this week" delta which is what stakeholders actually want.
+## Original Weekly Status tab
+Still works. Group-by Assignee, week picker, SHIPPED(5)/IN PROGRESS(4)/BLOCKED(2) all match
+its own prose line. No regression.
 
-## Hesitation / bugs / confusion
-- Minor: every item shows the assignee in parens "(Sam)" even when already grouped under "👤 Sam" — redundant noise in the on-screen view (though fine in the copied output for ungrouped contexts).
-- The Copy buttons sit in a sticky bar that floats over the middle of a long digest — looked slightly odd on a tall list, but they work. (Copy verified visually + clipboard read; both Markdown & plain text copied correctly.)
-- No copy/parse bugs found. Sample data, my CSV, both grouping modes, both copy modes, unmapped-status handling all worked.
+## Q1 — First reaction / would I use it for real work?
+Yes. A "what changed since last week" digest is exactly the framing stakeholders want — they
+don't want the full board, they want movement. Newly Shipped / Newly Blocked / Slipped is the
+narrative I currently hand-type. I'd paste the plaintext straight into our exec Notion update.
 
-## ONE thing that would raise the score
-A "what changed since last week" diff — paste/keep last week's digest and have it auto-mark new Shipped items and still-Blocked carry-overs. That's the actual thing my stakeholders read.
+## Q2 — The ONE thing stopping me from advocating harder
+Value lands one scroll too low. The Changes tab opens with the dropzone + "Load sample data"
+filling the whole first screen, so the digest summary line — the payoff — sits right at the
+fold and I scroll past the uploader every single time after the first use. Once I've loaded a
+file, push the summary to the top. Secondary: I have to export TWO Asana CSVs (this week +
+last week) myself to use it for real; if it remembered last week's export locally so I only
+drop the current one, that's the magic-moment upgrade.
+
+## Q3 — Trustworthy and copy-ready?
+Yes. Counts are internally consistent screen-vs-copy, both Markdown and plaintext are clean
+and paste-ready (Notion/Slack), owner attribution intact. I'd ship it to stakeholders as-is.
+
+ADVOCACY: 8/10  (would screenshot it for the team channel; -2 because I still hand-export two
+CSVs and the summary buries under the uploader on repeat use)
+VALUE: Yes
+CLARITY: Yes
 
 ```json
-{"tester": 1, "round": 1, "clarity": "Yes", "value": "Yes", "advocacy": 8, "topComplaints": ["redundant (assignee) label shown even when grouped by assignee", "snapshot only — no week-over-week delta, which is what stakeholders actually want"], "priorConcernsAddressed": "n/a"}
+{"tester": 1, "round": 1, "clarity": "Yes", "value": "Yes", "advocacy": 8, "topComplaints": ["Changes-tab summary sits below the dropzone — payoff buried one scroll down on repeat use", "Still must export TWO Asana CSVs by hand; no local memory of last week's export"], "priorConcernsAddressed": "n/a"}
 ```

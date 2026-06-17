@@ -1,26 +1,39 @@
-# Round 1 — Elena
+# Round 1 — Elena (Eng Manager, 8 reports, IN-AUDIENCE)
 
-Engineering manager, 8 reports, lives in Linear, owes a weekly Friday update. 30-sec patience.
+Cold open on laptop, retested key flow on my real device (phone, 375px) since I use this between meetings.
 
-## (1) CLARITY — Yes
-Headline "Turn your tracker export into a weekly status — in seconds" + subline "Drop a Jira, Linear, Asana, or GitHub CSV. Get a Shipped / In Progress / Blocked digest ready to paste into Slack." told me exactly what it is in under 5 seconds. "Linear" is named right there, which is what made me stay. And "Your file never leaves your browser — no upload, no signup" is right under the dropzone — answered my privacy/setup question before I had to ask. Zero friction, no account wall.
+## 30-second reaction
+Landing is instantly legible: "Turn your tracker export into a weekly status — in seconds." + "Drop a Jira, **Linear**, Asana, or GitHub CSV." Linear is named, "no upload, no signup" is right there. I'd stay. This is the thing I dread doing every Friday.
 
-## (2) VALUE — Yes
-Today I do this by hand: open Linear, eyeball my 8 reports' issues, hand-type a Shipped/In-Progress/Blocked summary grouped by person into a Google Doc / Slack post. Worst 20 min of my Friday.
+## Discovering + using the Changes tab
+Found the "Changes" tab unprompted (3rd pill, top). "Load sample data" loaded BOTH a current and prior-week CSV in one click — no second upload step, good. Header "Changes since last week" is exactly my skip-level's question phrased back to me.
 
-I uploaded a REAL Linear-style export (Done / In Progress / In Review / Todo / Backlog / Blocked). It mapped flawlessly: Done→Shipped, In Review→In Progress, grouped by assignee, and printed "All statuses recognized ✓". The one-line prose summary ("This week the team shipped 5, has 4 in progress and 2 blocked, with 1 carried over") is literally the sentence I open my update with. Carry-over got a yellow flag. Toggle to group by Epic worked. Copy Markdown and Copy plain text both produced clean, paste-ready output (carry-over preserved as [carry-over]) — Markdown for the doc, plain text for Slack. No re-entry of anything. This genuinely saves me the worst part of Friday, and it really is ~30 seconds.
+## Count verification (the thing I care most about)
+I copied the Markdown AND plaintext and inspected them against the rows on screen. Every count is honest end-to-end:
+- Newly Shipped 3 / Newly Blocked 1 / Slipped-Reopened 2 / New 4 / Unblocked 1 / Newly Started 1 / Still Blocked 1 / Carried over 2 / Removed 1 — header count = rows shown = copied rows, in ALL nine sections.
+- Prose summary "Since last week: 3 shipped, 1 newly blocked, 2 slipped, 4 new." matches the digest AND is byte-identical in the copied text.
+- NO count mismatch found. This is the trust bar for me and it cleared.
+- Markdown is clean `## Heading (n)` + `- item (Owner)`, pastes straight into a Google Doc or Slack. The "[blocked 2+ wks]" tag on Still Blocked is a genuinely useful carry-over flag.
 
-The unmapped-status row ("Needs Triage Review") with a "Move to…" dropdown is a nice touch — it didn't silently drop my data.
+## Weekly Status tab (regression check)
+Still works. Groups by Assignee (my mental model), shows carry-over flag, and — nice — surfaces an "UNMAPPED STATUS" item ("Needs Triage Review") with a manual Move-to control. That's the right call for Linear teams with custom statuses; builds my trust instead of silently dropping the row.
 
-## (3) ADVOCACY — 9
-I'd bring this up unprompted in our managers' Slack channel Friday afternoon. It nails the exact job, no setup, no login. Held back from a 10 only because I haven't used it on my own messy export across a few weeks yet — one good real-world run and it's a 10.
+## Q1 — First reaction / would I use it for real work?
+Yes. "What changed since last week on my team" is the exact question my skip-level asks, and this turns a Linear CSV into that answer with one click. The Shipped/Blocked/Slipped framing is how I already think. I'd use this Friday.
 
-Hesitation: none that stopped me. Minor: I'd want to confirm it handles a 60-row export and odd assignee names, but the sample + my test both clean.
+## Q2 — The ONE thing stopping me from advocating
+I haven't fed it MY real Linear export yet — I only trust the sample. My Linear CSV has custom statuses, sub-issues, and 8 people's noise. The Weekly tab's "Remap columns" + "Unmapped status" handling makes me *believe* it'll cope, but until I drop my own messy export and it doesn't choke or miscount, I'm at "promising," not "I bring it up unprompted." Closely behind: on phone the Copy buttons are sticky and overlap a digest row while scrolling (cosmetic, not a blocker).
 
-Bug/confusion: none. Copy verified visually (label flips to "Copied ✓") and clipboard read confirmed real content.
+## Q3 — Trustworthy and copy-ready?
+Yes. Counts are internally consistent and match the copied output exactly; Markdown drops cleanly into Slack/Docs. (Clipboard read worked in my test env with permissions granted.) Copy-ready for where it needs to go.
 
-ONE thing to raise the score: a date-range or "since last Friday" filter so it only digests this week's items — right now it digests the whole export, and my Linear export has months of history. That's the gap between "great" and "I never write a status by hand again."
+---
+ADVOCACY: 8/10
+VALUE: Yes
+CLARITY: Yes
+
+What holds it back from 9: needs to survive MY real, messy Linear export — sample data is honest but not proof for my team yet. Fix the sticky-button overlap on mobile and I'd happily bring it up to other managers.
 
 ```json
-{"tester": 1, "round": 1, "clarity": "Yes", "value": "Yes", "advocacy": 9, "topComplaints": ["No date/week filter — digests the whole export, not just this week's items", "Want to verify on a large real export with messy names before fully trusting"], "priorConcernsAddressed": "n/a"}
+{"tester": 1, "round": 1, "clarity": "Yes", "value": "Yes", "advocacy": 8, "topComplaints": ["Only trusted the sample; haven't proven it on my own messy Linear export (custom statuses, sub-issues)", "On phone the sticky Copy Markdown/plain-text buttons overlap a digest row while scrolling"], "priorConcernsAddressed": "n/a"}
 ```

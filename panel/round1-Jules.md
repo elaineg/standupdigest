@@ -1,25 +1,58 @@
-# Round 1 — Jules
+# StandupDigest — Round 1 — Jules (Content & community marketer, NON-FIT audience)
 
-**Persona:** Content & community marketer. Lives in Notion, Buffer, Mailchimp, Figma. NON-FIT — I don't use Jira/Linear/Asana. My "tracker" is a Notion board for content and Buffer's queue.
+## 5-second cold reaction
+Headline: "Turn your tracker export into a weekly status — in seconds." Subhead names
+"Jira, Linear, Asana, or GitHub CSV... paste into Slack." In 5 seconds I knew exactly what
+it is and who it's for — and it's not me. I track content in Notion + Buffer and report to
+my team in a Notion doc / Slack thread by hand. I don't export issue-tracker CSVs. So:
+crystal clear, but clearly a dev/PM tool, not a marketer tool.
 
-## (1) CLARITY — Yes
-Within 5s, totally clear. Headline "Turn your tracker export into a weekly status — in seconds" plus the subline naming Jira/Linear/Asana/GitHub CSV and "ready to paste into Slack" told me exactly what it is and who it's for (engineering / project teams doing standups). And the line "Your file never leaves your browser — no upload, no signup" directly under the drop zone hit both of my biggest questions. No login allergy triggered. Clean, honest, no fluff.
+## Changes tab (the new feature)
+Discovered it as the 3rd pill ("Changes"). "Load sample data" loaded BOTH current + prior
+week in one click — nice, no fumbling with two files. Output is a clean diff: Newly Shipped,
+Newly Blocked, Slipped/Reopened, New this period, Unblocked, Newly Started, Carried over,
+Still Blocked, Removed from tracker, plus a one-line prose summary and an editable line.
 
-## (2) VALUE — No (for me)
-This is genuinely well-made — I loaded the sample, the digest grouped by Assignee/Epic, the prose one-liner ("shipped 5, 4 in progress, 2 blocked, 1 carried over") is a nice touch, the `carry-over` tag and the "Unmapped status → Move to…" fallback show real care. Copy as Markdown AND plain text both worked and the output was clean, paste-ready.
+### Count integrity check (did it carefully)
+Prose: "Since last week: 3 shipped, 1 newly blocked, 2 slipped, 4 new."
+On-screen header counts vs actual rows vs copied Markdown vs copied plaintext — ALL MATCH:
+- Newly Shipped (3)=3 rows=copy. Newly Blocked (1)=1. Slipped/Reopened (2)=2. New (4)=4.
+- Unblocked (1), Newly Started (1), Still Blocked (1), Carried over (2), Removed (1) — all consistent.
+Both Copy Markdown and Copy plain text produced well-formed, count-accurate output.
+(Copy verified visually + clipboard read fine in test env.) No count mismatch anywhere — trustworthy.
 
-But it solves a problem I don't have. I track content in a Notion board and a Buffer queue, not an issue tracker. There's no "export a CSV of issues → post a status" job in my week. My weekly update is a few bullets in a Notion doc or a Slack message I write by hand from memory. There's no CSV in that loop, so this app has nothing to chew on. I'd try it once out of curiosity and never return. Not the app's fault — I'm just not its user.
+### Real defect I hit (not a count issue — a layout one)
+At desktop 1280px the **"Copy Markdown" / "Copy plain text" buttons render floating in the
+MIDDLE of the list**, jammed between "SLIPPED / REOPENED (2)" and its "(Dave)" row, splitting
+that section in two (see changes-loaded.png). The copy actions belong at the bottom (or top),
+not buried inside the content. It looks broken even though it works, and it made the Slipped
+section confusing to read.
 
-## (3) ADVOCACY — 6
-I would NOT recommend it to my marketing peers (same non-fit). But I'd happily forward it to an eng-manager or PM friend who runs standups — it looks like exactly their thing and the no-signup/no-upload angle is a real selling point. So it's a "right person, instant share" but for most of my circle it's irrelevant. A 6, honestly: not low because the build is solid and shareable to the right person, not high because it has zero pull for me or most people I'd talk to.
+## Weekly Status tab sanity
+Still works. Loads sample, groups by Assignee, prose summary ("shipped 5, 4 in progress, 2
+blocked, 1 carried over"), week selector all render. No page/console errors anywhere.
 
-## Hesitation / confusion
-- None on the core flow — it just worked. Only mild thing: "Backlog / To Do" and "Unmapped status" sit BELOW the Copy buttons, so on first glance the copy buttons looked like the end of the digest and I almost missed two sections. Minor layout quibble.
-- No bugs. No console errors. Both copy formats verified with real content.
+## Three questions
+Q1 First reaction / would I use it for my work? Sharp, fast, no-signup — genuinely good for a
+dev team. But for MY job (content/community marketing) there's no tracker CSV to feed it; my
+"standup" is a Notion update and a Buffer queue. I'd try it once out of curiosity, then never
+return. Wrong workflow for me, not a quality problem.
 
-## ONE thing that would raise my score
-Make it speak to non-issue-tracker workflows: paste any list / Notion export / plain bullets, not just Jira/Linear/Asana/GitHub CSVs. If I could drop my Notion content-board export and get a tidy weekly recap, this jumps from "forward to a PM friend" to "I use this every Friday."
+Q2 The ONE thing stopping advocacy? It doesn't map to my workflow at all — every input source
+listed (Jira/Linear/Asana/GitHub) is engineering tooling. I have nobody to recommend it to
+except the eng leads I sit next to, and they'd be the better judges. The floating Copy buttons
+are the one thing I'd flag as an actual bug if I did pass it along.
+
+Q3 Trustworthy / copy-ready? Yes. Counts are internally consistent across prose, screen, and
+both copy formats; Markdown pastes clean into Slack/Notion. The only blemish is the misplaced
+Copy buttons, which is visual, not data.
+
+## Scores
+ADVOCACY: 3/10 — well-built and trustworthy, but a complete workflow non-fit for a marketer;
+I can't honestly bring this up unprompted to my circle. Score reflects fit, not quality.
+VALUE: No — I have no CSV-export-to-status job; this saves me nothing over my Notion update.
+CLARITY: Yes — I understood it and its (dev) audience in under 5 seconds.
 
 ```json
-{"tester": 0, "round": 1, "clarity": "Yes", "value": "No", "advocacy": 6, "topComplaints": ["Solves an issue-tracker problem I don't have — no CSV-export-to-status job in my marketing workflow", "Copy buttons sit above two more digest sections, so I nearly missed Backlog/Unmapped"], "priorConcernsAddressed": "n/a"}
+{"tester": 0, "round": 1, "clarity": "Yes", "value": "No", "advocacy": 3, "topComplaints": ["Workflow non-fit: every input source is an engineering tracker (Jira/Linear/Asana/GitHub) — no marketer CSV-to-status job exists for me", "Layout bug: Copy Markdown/plain-text buttons render floating in the MIDDLE of the Changes list, splitting the Slipped/Reopened section at desktop 1280px"], "priorConcernsAddressed": "n/a"}
 ```

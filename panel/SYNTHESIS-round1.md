@@ -1,60 +1,47 @@
-# StandupDigest — Panel Synthesis, Round 1 (run 20260616-010023-daily)
+# StandupDigest — Panel SYNTHESIS Round 1
 
-## 1. Score table
+Feature under test: 3rd tab **"Changes"** (week-over-week diff digest). Served locally at http://localhost:3211.
+Bar: AUDIENCE-WEIGHTED — in-audience personas (report compilers owing a recurring team status) must advocate at **ADVOCACY ≥ 9 with Value=Yes and Clarity=Yes**. Non-fit personas are recorded but do not gate.
 
-| Tester | Role | Audience | Clarity | Value | Advocacy |
-|--------|------|----------|---------|-------|----------|
-| Sam   | Product manager            | in-audience  | Yes | Yes | 8 |
-| Elena | Engineering manager        | in-audience  | Yes | Yes | 8 |
-| Wen   | Marketing data analyst     | in-audience  | Yes | Yes | 8 |
-| Tomás | Operations analyst         | in-audience  | Yes | Yes | 8 |
-| Dana  | Demand-gen marketer        | non-fit*     | Yes | Yes | 8 |
-| Marcus| Frontend engineer (IC)     | non-fit      | Yes | No  | 6 |
-| Priya | Senior backend engineer(IC)| non-fit      | Yes | No  | 5 |
-| Aisha | Product designer           | non-fit      | Yes | No  | 6 |
-| Jules | Content/community marketer  | non-fit      | Yes | No  | 4 |
-| Rob   | Brand/visual designer      | non-fit      | Yes | No  | 2 |
+## Per-tester table
 
-\*Dana is a non-fit by role, but uses the Weekly Status tab on a real Asana export weekly, has value=Yes, and reproduced the inline-edit bug — carry her into round 2 as the bug verifier.
+| Name | In-audience? | Advocacy | Value | Clarity | The ONE thing blocking a higher score |
+|------|-------------|----------|-------|---------|----------------------------------------|
+| Wen | **IN-AUDIENCE** | 8 | Yes | Yes | Sticky Copy-buttons bar renders mid-list (overlaps digest) — looks half-broken, undercuts the trustworthy-output pitch |
+| Tomás | **IN-AUDIENCE** | 8 | Yes | Yes | Wants one run on his own messy real Jira export; "Slipped / Reopened" merges two distinct events into one count |
+| Dana | **IN-AUDIENCE** | 8 | Yes | Yes | Digest payoff sits below the dropzone — one scroll down on every repeat use; wants last week's export remembered |
+| Elena | **IN-AUDIENCE** | 8 | Yes | Yes | Hasn't fed her own real Linear export yet; sticky Copy buttons overlap a digest row on mobile scroll |
+| Sam | **IN-AUDIENCE** | 8 | Yes | Yes | Only validated on sample data, unproven on real Asana CSV w/ custom fields; sticky Copy bar overlaps on mobile |
+| Aisha | non-fit | 7 | Marginal | Yes | Prose summary surfaces only 4 of 9 categories (drops unblocked/removed/still-blocked) — reads partial; not her workflow |
+| Marcus | non-fit | 6 | Marginal | Yes | Pure audience fit — reports up, no team to aggregate |
+| Priya | non-fit | 4 | No | Yes | Audience fit — IC who writes own Slack bullets; no recurring compile job |
+| Jules | non-fit | 3 | No | Yes | Workflow non-fit — no tracker export; lives in Notion/Buffer |
+| Rob | non-fit | 2 | No | Yes | Workflow non-fit — solo freelance designer, no team/tracker |
 
-## 2. Audience-weighted bar status
+## In-audience tally
 
-The 4 in-audience compilers (Sam, Elena, Wen, Tomás) must each reach advocacy ≥9.
-Current: **all four at 8**. Gap: **+1 each** to clear the bar. No in-audience tester is below 8, so the bar is within reach if the recurring blockers are fixed.
+In-audience personas (5): **Wen, Tomás, Dana, Elena, Sam**.
+At bar (Advocacy ≥ 9, Value=Yes, Clarity=Yes): **0 / 5**.
+All five are clustered at **8** with Value=Yes and Clarity=Yes — a tight, consistent near-miss, not a scatter. Not a single in-audience persona reached 9.
 
-## 3. Complaints grouped by cause
+Non-fit personas (5): Marcus, Priya, Jules, Rob, Aisha — recorded, do not gate. All confirm clarity=Yes and trustworthy output; their low advocacy is audience fit, not quality.
 
-### A. Velocity / by-assignee number honesty — IN-AUDIENCE RECURRING (Sam, Wen, Tomás; Elena adjacent)
-The "committed" denominator (34) is just sum-of-all-sprint-points, and BY ASSIGNEE shows committed points (totaling 34) not shipped, so it doesn't reconcile with the velocity headline (21 shipped). A stakeholder skimming "Sam — 18 pts" reads it as 18 delivered.
-- Sam: label denominator honestly or expose a commitment marker.
-- Wen: split by-assignee shipped-vs-committed ("Sam — 12 of 18 pts shipped").
-- Tomás: add a "velocity = done / committed" tooltip.
-- Elena: word "committed"/"completed" not used verbatim — ambiguous for skim-readers.
-**This is the primary path-to-9 for the in-audience group.**
+## Count-honesty / copy-cue check (this app's historical weak point)
 
-### B. Sample-data self-consistency — IN-AUDIENCE (Tomás; noted by Wen/Sam as benign)
-Sprint 23 shows 0 pts shipped yet lists per-assignee points + spillover, which briefly made Tomás distrust the math. Relabel/fix the sparse Sprint 23 sample so it's obviously self-consistent.
+**PASS — clean across all 10 testers.** Every tester independently copied both Markdown and plaintext and inspected the clipboard. The prose summary ("3 shipped, 1 newly blocked, 2 slipped, 4 new") reconciles with the section headers, the on-screen rows (including collapsed Carried-over / Still Blocked / Removed sections), AND both copied formats — byte-for-byte. Wen (the data-hygiene skeptic) also crafted her own prior/current CSVs and confirmed correct bucketing keyed on the issue Key column, so renamed rows don't fake adds/removes. No count mismatch anywhere. Weekly Status tab: no regression reported by anyone.
 
-### C. Inline-edit commit bug — IN-AUDIENCE-ADJACENT (Dana reproduced 3x; Tomás couldn't confirm)
-Edited line stays trapped in the input, never commits to the rendered digest or copy output, and the Copy buttons become unreachable (a second empty input appears on top). Tomás couldn't confirm the edit→copy round trip. **Likely shared root cause with D** — the overlapping sticky bar may intercept the click/blur that commits the edit. Also: Enter doesn't commit (Wen, Aisha hit Enter, thought it broken) — accept Enter as well as Save.
+## Single most-common NAMED defect blocking in-audience advocacy
 
-### D. Sticky copy-bar overlap — CSS, BROAD (Sam minor/mobile; Priya, Marcus, Aisha, Rob)
-The fixed bottom Copy bar overlaps the last BY-ASSIGNEE rows / Blocked section. Fix: solid background + bottom padding on the scroll container so content clears it. (Cheap, broad-impact, and may unblock the edit bug.)
+**Sticky "Copy Markdown / Copy plain text" button bar renders floating in the MIDDLE of the digest list, overlapping rows, instead of pinned at the bottom.**
 
-### E. Audience non-fit / out-of-scope — DO NOT treat as build defects
-- Priya, Marcus: IC engineers who report UP, not sprint-review owners.
-- Jules: content marketer, no tracker/story points.
-- Aisha, Rob: designers, no sprints/CSV.
-- Elena's only path-to-9 ask is a paste-from-tracker input — out of scope (mapping is already remembered; file-drop is the supported path).
-These cap advocacy by role, not by fixable defects.
+- Reported by 7 of 10 testers (Wen, Tomás, Jules, Rob, Elena, Sam saw it; Marcus/Dana/Aisha inspected and called it a `sticky bottom-0` footer that only *looks* broken in a full-page screenshot).
+- Repro: Changes tab → "Load sample data" → on a tall digest (desktop ~1280–1440px AND mobile scroll), the Copy bar wedges between the "SLIPPED / REOPENED (2)" section and its "(Dave)" row, splitting the section. Functions correctly; copied content is correct. Pure layout/CSS.
+- Why it gates: in-audience testers explicitly tie it to the trust pitch ("looks half-broken... undercuts the trustworthy-output pitch" — Wen). It is the most-cited blocker on otherwise-9-ready verdicts.
 
-## 4. Recommendation
+Secondary named defect (2 mentions, Aisha + aligns w/ count-legibility): **prose summary surfaces only 4 of the 9 change categories** (shipped/blocked/slipped/new), silently omitting Unblocked / Newly Started / Still Blocked / Carried-over / Removed — reads as a partial summary even though section counts are all correct.
 
-**Fix (in-audience-blocking), ranked:**
-1. **A — Velocity/by-assignee honesty**: label denominator ("of 34 pts in sprint"), split by-assignee into shipped-of-committed ("Sam — 12 of 18 pts shipped"), add a velocity tooltip. (Hits 3-4 in-audience testers; the main +1.)
-2. **D — Sticky copy-bar overlap**: solid bg + bottom padding. (Broad, cheap, likely unblocks C.)
-3. **C — Inline-edit commit bug**: Save (and Enter) must commit into rendered digest + both copy outputs, then return to static display; ensure Copy buttons stay reachable. (Trust-critical; Dana's value gate.)
-4. **B — Sprint 23 sample self-consistency**: relabel/fix the 0-shipped-with-points sample.
+Tertiary (Dana): digest payoff sits below the dropzone after load — push the digest to the top once files are loaded so the value lands without a scroll.
 
-**Re-test in round 2:** the 4 in-audience compilers (Sam, Elena, Wen, Tomás) + Dana (verifies the edit-bug fix, value=Yes).
-**Carry forward unchanged:** the 5 audience non-fits (Marcus, Priya, Aisha, Jules, Rob) — no build fix changes their role mismatch.
+## Verdict
+
+**NOT A PASS — needs another round.** 0/5 in-audience at the bar; all five at a consistent Advocacy 8 / Value Yes / Clarity Yes. Fix the floating Copy-bar layout (primary, 7 mentions) and expand the prose summary to cover all populated categories (secondary); that addresses the named blockers keeping the five compilers off 9.

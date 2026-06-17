@@ -1,88 +1,49 @@
-# StandupDigest — Panel Round 2 Synthesis (delta re-test)
+# StandupDigest — Panel SYNTHESIS Round 2 (delta-retest)
 
-App served locally at http://localhost:3210 (next start prod build). Round 2 re-tested 6 personas
-(Wen, Tomás, Dana, Sam — IN-AUDIENCE gating; Marcus, Aisha — NON-FIT, bug-confirm only). Elena,
-Priya, Jules, Rob carried from round 1.
+Feature under test: 3rd tab **"Changes"** (week-over-week diff digest). Served locally at http://localhost:3211.
+Bar: AUDIENCE-WEIGHTED — in-audience compilers (recurring team-status owners) must advocate at **ADVOCACY ≥ 9 with Value=Yes and Clarity=Yes**. Non-fit personas are carried, non-gating.
 
-## Audience-weighted ship bar
-Bar = **all 5 IN-AUDIENCE personas (Wen, Tomás, Dana, Sam, Elena) at advocacy ≥9 with clarity=Yes &
-value=Yes.** NON-FIT personas do not gate.
+Round-1 result: all 5 in-audience compilers clustered at advocacy **8** (Value=Yes, Clarity=Yes), 0/5 at bar — a tight near-miss blocked by two named Changes-tab defects:
+1. Copy bar floated mid-list, overlapping digest rows (looks broken; undercuts trust pitch).
+2. Prose summary named only 4 of 9 categories (read partial).
 
-## Score table (all 10)
+Both were fixed and independently re-verified, then re-tested here by the SAME 5 compilers (delta-retest, carry-forward pattern).
 
-| Persona | In-audience? | Clarity | Value    | Advocacy | Round | Δ vs R1 |
-|---------|--------------|---------|----------|----------|-------|---------|
-| Wen     | IN-AUDIENCE  | Yes     | Yes      | **9**    | R2    | 6 → 9 ✅ |
-| Tomás   | IN-AUDIENCE  | Yes     | Yes      | **9**    | R2    | 8 → 9 ✅ |
-| Dana    | IN-AUDIENCE  | Yes     | Yes      | **8**    | R2    | 8 → 8   |
-| Sam     | IN-AUDIENCE  | Yes     | Yes      | **8**    | R2    | 8 → 8   |
-| Elena   | IN-AUDIENCE  | Yes     | Yes      | 9        | R1 (carried) | — |
-| Priya   | NON-FIT      | Yes     | No       | 5        | R1 (carried) | — |
-| Marcus  | NON-FIT      | Yes     | No       | **4**    | R2    | 5 → 4 ⬇ |
-| Jules   | NON-FIT      | Yes     | No       | 6        | R1 (carried) | — |
-| Aisha   | NON-FIT      | Yes     | No       | **8**    | R2    | 6 → 8 ✅ |
-| Rob     | NON-FIT      | Yes     | No       | 4        | R1 (carried) | — |
+## Per-tester table (re-tested in-audience compilers)
 
-**IN-AUDIENCE passing at adv≥9 / clarity=Yes / value=Yes: 3 of 5** (Wen 9, Tomás 9, Elena 9).
-Sub-bar in-audience: **Dana 8, Sam 8** (both value=Yes, fixable in-scope friction).
+| Name | Advocacy R1→R2 | Value | Clarity | Round-1 blocker resolved? | Residual (non-gating) |
+|------|----------------|-------|---------|---------------------------|------------------------|
+| Wen   | 8 → **9** | Yes | Yes | **YES** — copy bar `fixed bottom-0`, no row overlap desktop+mobile; prose now names all 9 buckets; counts airtight (16/16/16/16) | Collapsed sections need a click to reveal bodies (counts/copy unaffected) — only thing shy of a 10 |
+| Tomás | 8 → **8** | Yes | Yes | **YES** — verified copy bar pinned, clean gap desktop+mobile; prose complete; counts end-to-end honest | His OWN held-back concern is untouched & out of scope: "Slipped / Reopened" still merges two distinct events into one count; real-export unproven (he'd try it Monday) |
+| Dana  | 8 → **9** | Yes | Yes | **YES** — copy bar `fixed bottom-0`, no overlap desktop+mobile; fuller prose now lands above the fold (kills his R1 "payoff too low" gripe); counts 16/16/16/16 | Still hand-exports two Asana CSVs; no local memory of last week — keeps it off a 10 |
+| Elena | 8 → **9** | Yes | Yes | **YES** — her exact R1 blocker (mobile copy-bar overlap) gone: scrolled full 1754px digest at 375px, 0 overlapping rows, buttons hittable; prose complete; counts 16/16/16/16 | Hasn't run her own gnarly real Linear export — only thing shy of a 10 |
+| Sam   | 8 → **9** | Yes | Yes | **YES** — his exact R1 blocker (mobile copy-bar overlap) gone: bar pinned topmost, rows scroll underneath, header above readable; prose complete; counts 16/16/16/16 | Sample-only; won't debug a column remap on his real Asana CSV — only thing shy of a 10 |
 
-## Round-1 blocker resolution (in-audience)
+## In-audience tally at bar
 
-| R1 blocker (cause group) | Tester(s) | Resolved in R2? | Evidence |
-|--------------------------|-----------|-----------------|----------|
-| A. Title-column silent miss / no Remap entry / false "All statuses recognized ✓" | Wen | **YES** | Amber banner auto-opens on column-NAME miss; Title shows `(none)` not silent "(untitled)"; persistent Remap; false ✓ gone. |
-| B. Phantom `(Bob)` in copy; grouping not honored in copy | Wen, Dana, Aisha | **YES** | Copied MD + plain text exactly match screen; epic grouping preserved (`### Checkout v2`) in both copy formats (Aisha clipboard-verified). |
-| C. Sticky copy bar occludes/splits digest | Tomás, Aisha, Sam | **YES** | Opaque bg, bottom-pinned, no bleed-through over BLOCKED/BACKLOG/UNMAPPED at any scroll; pinned on mobile. |
-| D. Week filter / week-over-week delta / "week of <date>" stamp | Elena(carried), Dana, Sam | **YES** | "Week:" selector defaults to recent week + "All dates"; re-filters counts; carry-over rows stay flagged under a specific week; date baked into prose. |
-| E. Editable one-line prose summary | Sam | **PARTIAL** | Edit works and flows verbatim into both copy formats, BUT the Edit affordance is `opacity:0`-until-hover → invisible/unreachable on touch/mobile. |
+In-audience compilers (5): **Wen, Tomás, Dana, Elena, Sam**.
+At bar (Advocacy ≥ 9, Value=Yes, Clarity=Yes): **4 / 5** — Wen, Dana, Elena, Sam all rose 8→9.
+Below bar: **Tomás at 8** (Value=Yes, Clarity=Yes). His round-1 blocker IS resolved and he confirmed the fixes did exactly what was promised and broke nothing — but he holds at 8 on his OWN distinct, out-of-scope concern: the "Slipped / Reopened" bucket merges two different events into one count, which he reports separately to stakeholders.
 
-## Remaining complaints behind a SUB-BAR IN-AUDIENCE score, grouped by cause
+## Non-fit personas (carried forward, non-gating)
 
-### 1. Real-export header auto-detect still misses common non-"Title" headers — IN-AUDIENCE (Dana, holds 8 not 9) — NOT fully resolved
-Dana uploaded a real Asana export with header `Task Name`; auto-detect did NOT map it, so every task
-rendered "(untitled)" until she manually used Remap. The round-1 fix added the amber banner + Remap
-recovery path (well-signposted, recoverable — that's why she didn't drop further), but the recovery is
-a manual step that breaks her "value in one scroll" bar. **In-scope, fixable:** broaden title-column
-auto-detection synonyms (Task Name / Summary / Name / Item / Subject) so common tracker exports
-auto-map without a manual remap. (Same class as Wen's R1 blocker, just at the auto-detect layer rather
-than the no-recovery layer.)
+- **Aisha 7** — non-fit (judges craft, doesn't own a recurring team digest); R1 partial-prose gripe is now moot (prose names all 9). Carried.
+- **Marcus 6** — non-fit; reports up, no team to aggregate. Carried.
+- **Priya 4** — non-fit; IC writing her own Slack bullets, no recurring compile job. Carried.
+- **Jules 3** — non-fit; tracks content in Notion/Buffer, no tracker export. Carried.
+- **Rob 2** — non-fit; solo freelance designer, no team/tracker. Carried.
 
-### 2. Editable prose Edit control is hover-gated → invisible on mobile — IN-AUDIENCE (Sam, holds 8 not 9) — PARTIAL
-The marquee new feature (edit the VP sentence) works and round-trips into copy on desktop, but the Edit
-button is `opacity:0` until hover, so on Sam's primary device (mobile) it's effectively absent and there's
-no editable field before the click. **In-scope, fixable:** make the Edit affordance always-visible (or a
-persistent control) on touch/small viewports.
+## Both round-1 defects: resolved (unanimous across all 5 re-testers)
 
-### Minor / park-able (non-gating)
-- **Tomás:** landing subtitle still says "paste into Slack"; he's a Teams shop (held off 10, but he's at 9). Genericize destination wording.
-- **Wen:** wants CSV-out of categorized rows to diff against source (10-not-9 nice-to-have).
-- **Dana:** redundant on-screen `(Sam)` parens when grouped by assignee (screen-only nit; copy is clean).
+1. **Copy bar overlap — RESOLVED.** All 5 independently confirmed `position:fixed; bottom:0` with content clearance; no digest row overlaps the bar at full-scroll on desktop (1280px) AND mobile (375px); both copy buttons hittable. The two testers whose specific blocker this was (Elena, Sam — mobile overlap) confirmed it on a 375px viewport.
+2. **Prose completeness — RESOLVED.** All 5 confirmed the prose now names all 9 non-zero categories: "3 shipped, 1 started, 1 newly blocked, 1 unblocked, 2 slipped, 4 new, 1 still blocked, 2 carried over, 1 removed from tracker."
 
-## NON-FIT findings (do NOT gate)
-- **Aisha (NON-FIT, 6 → 8):** both her R1 craft issues (copy-bar occlusion, epic grouping not honored in
-  copy) genuinely fixed; advocacy capped only on audience fit.
-- **Marcus (NON-FIT, 5 → 4):** confirms a REAL in-scope correctness bug is **NOT resolved**. The R2 fix
-  only triggers the banner/auto-open on a column-NAME detection MISS. For a GitHub export
-  (`Title,State,Labels,Assignee`) auto-detect maps the column names correctly, so no banner fires — but
-  the VALUE mapping is wrong: all `open` issues dump to BACKLOG (In Progress 0, Blocked 0), `blocked`
-  labels are ignored, and the green "All statuses recognized ✓" STILL shows on this wrong output. This is
-  a value-level mapping defect (open→In Progress, blocked-label→Blocked), not a column-name miss, so
-  nothing shipped addresses it. GitHub Issues is advertised on the landing page. NON-FIT so non-gating,
-  but it is a genuine correctness/trust defect against an advertised input and should be fixed or the
-  GitHub claim dropped.
+## Count-honesty re-check (this app's historical weak point) — PASS
 
-## Recommendation: **FIX with named changes** (do NOT ship yet)
+Clean across all 5 re-testers. Prose total (16) == on-screen header counts summed (16) == copied Markdown bullets (16) == copied plaintext bullets (16), byte-aligned. Collapsed sections (Carried over, Still Blocked) hide bodies on screen but their rows ARE present in both copies with matching badge counts — no silent dropping. Weekly Status tab: no regression reported by anyone.
 
-3 of 5 in-audience clear adv≥9 (Wen, Tomás, Elena). Two in-audience holdouts (Dana 8, Sam 8) are
-value=Yes with FIXABLE in-scope complaints — not NON-FIT, not out-of-scope. Round-2 fix list:
+## Verdict
 
-1. **Broaden title-column auto-detect synonyms** (Task Name / Summary / Name / Item / Subject / Card) so
-   common Asana/Jira exports auto-map the title without a manual Remap step. — lifts **Dana** to 9.
-2. **Make the prose-summary Edit affordance always-visible on touch/small viewports** (no hover gate). —
-   lifts **Sam** to 9.
-3. **(Non-gating but real)** Fix GitHub-export VALUE mapping: `State` open→In Progress / closed→Shipped,
-   `blocked` label→Blocked; and don't show "All statuses recognized ✓" when rows fall through to Backlog
-   from an unrecognized status value. Or drop GitHub from advertised inputs. — Marcus's bug; trust on an
-   advertised path.
+**NOT A PASS — 4/5 in-audience at the bar.** Four compilers (Wen, Dana, Elena, Sam) rose to advocacy 9 with Value=Yes / Clarity=Yes; both named round-1 defects are unanimously resolved and count honesty holds. The single sub-bar compiler is **Tomás at 8** — his round-1 blocker is gone, but he holds on a NEW/distinct named defect surfaced in round 1 and untouched by this round's scope:
 
-After (1) and (2), all 5 in-audience should clear adv≥9 → ship.
+**Remaining defect (Tomás, the path to 5/5):** the **"Slipped / Reopened" bucket merges two semantically distinct events into one count.** Repro: Changes tab → Load sample data → the "SLIPPED / REOPENED (2)" section groups a date-slipped item and a reopened/regressed item under one heading and one count. Tomás reports these as different stories to stakeholders and would hand-split them, holding him at 8. Splitting Slipped and Reopened into two separate buckets (each with its own count) is the fix that would lift him to 9 and the round to a 5/5 pass.

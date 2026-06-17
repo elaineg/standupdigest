@@ -9,20 +9,21 @@ import {
   type GroupMode,
   type ParseResult,
 } from "@/lib/csvParser";
-import { SAMPLE_CSV } from "@/lib/sampleData";
+import { SAMPLE_CSV, CHANGES_CURRENT_CSV, CHANGES_PRIOR_CSV } from "@/lib/sampleData";
 import {
   DigestView,
   computeWeekOptions,
   type WeekOption,
 } from "@/components/DigestView";
 import { SprintReviewView } from "@/components/SprintReviewView";
+import { ChangesView } from "@/components/ChangesView";
 import { RemapPanel } from "@/components/RemapPanel";
 
 const LS_MAP_KEY = (source: string) => `standupdigest-colmap-${source}`;
 const LS_GROUP_KEY = "standupdigest-groupmode";
 const LS_MODE_KEY = "standupdigest-mode";
 
-type AppMode = "weekly" | "sprint";
+type AppMode = "weekly" | "sprint" | "changes";
 
 function loadSavedMap(source: string): Partial<ColumnMap> | null {
   try {
@@ -58,8 +59,10 @@ export default function DigestApp() {
   // Fix 4: week filter state
   const [weekFilter, setWeekFilter] = useState<string>("all");
   const [availableWeeks, setAvailableWeeks] = useState<WeekOption[]>([]);
-  // Tab mode: "weekly" (default) | "sprint"
+  // Tab mode: "weekly" (default) | "sprint" | "changes"
   const [mode, setMode] = useState<AppMode>("weekly");
+  // Changes tab: prior-period rows (set by "Load sample data" on the Changes tab)
+  const [changesPriorRows, setChangesPriorRows] = useState<DigestRow[] | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -79,8 +82,8 @@ export default function DigestApp() {
   useEffect(() => {
     try {
       const saved = window.localStorage.getItem(LS_MODE_KEY);
-      if (saved === "weekly" || saved === "sprint") {
-        setMode(saved);
+      if (saved === "weekly" || saved === "sprint" || saved === "changes") {
+        setMode(saved as AppMode);
       }
     } catch {
       // ignore
@@ -174,6 +177,16 @@ export default function DigestApp() {
     processCSV(SAMPLE_CSV);
   }, [processCSV]);
 
+  // Changes tab: load BOTH the current Changes sample AND the prior-week sample at once
+  const handleLoadSampleChanges = useCallback(() => {
+    // Load the current sample (the Changes-specific current export with Issue Keys)
+    setRawCSV(CHANGES_CURRENT_CSV);
+    processCSV(CHANGES_CURRENT_CSV);
+    // Parse and set the prior rows for the Changes tab
+    const priorResult = parseCSVText(CHANGES_PRIOR_CSV);
+    setChangesPriorRows(priorResult.rows);
+  }, [processCSV]);
+
   const handleClear = useCallback(() => {
     setParseResult(null);
     setRows([]);
@@ -182,6 +195,7 @@ export default function DigestApp() {
     setShowRemap(false);
     setWeekFilter("all");
     setAvailableWeeks([]);
+    setChangesPriorRows(null);
   }, []);
 
   const handleDrop = useCallback(
@@ -265,6 +279,8 @@ export default function DigestApp() {
   const coldSubtitle =
     mode === "sprint"
       ? "Drop the same CSV — get velocity, scope change, spillover, and points by assignee for a sprint."
+      : mode === "changes"
+      ? "Drop your current CSV and last week's export — see what shipped, what got blocked, and what slipped."
       : "Drop a Jira, Linear, Asana, or GitHub CSV. Get a Shipped / In Progress / Blocked digest ready to paste into Slack.";
 
   return (
@@ -307,10 +323,23 @@ export default function DigestApp() {
           >
             Sprint Review
           </button>
+          <button
+            role="tab"
+            aria-selected={mode === "changes"}
+            data-testid="tab-changes"
+            onClick={() => setMode("changes")}
+            className={`rounded px-4 py-2 text-sm font-semibold transition-colors ${
+              mode === "changes"
+                ? "bg-blue-600 text-white"
+                : "text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            Changes
+          </button>
         </div>
 
-        {/* Cold state hero */}
-        {!hasDigest && (
+        {/* Cold state hero — hidden on Changes tab (it has its own UI) */}
+        {!hasDigest && mode !== "changes" && (
           <div className="mb-8 text-center">
             <h1 className="text-3xl font-bold text-gray-900 sm:text-4xl">
               Turn your tracker export into a weekly status — in seconds.
@@ -321,8 +350,8 @@ export default function DigestApp() {
           </div>
         )}
 
-        {/* Dropzone */}
-        {!hasDigest && (
+        {/* Dropzone — hidden on Changes tab (ChangesView has its own dropzones) */}
+        {!hasDigest && mode !== "changes" && (
           <div
             onDrop={handleDrop}
             onDragOver={handleDragOver}
@@ -394,8 +423,33 @@ export default function DigestApp() {
           </div>
         )}
 
-        {/* Populated view */}
-        {hasDigest && parseResult && (
+        {/* Changes tab — always rendered (handles its own cold/populated state) */}
+        {mode === "changes" && (
+          <ChangesView
+            currentRows={rows}
+            hasCurrentFile={hasDigest}
+            onLoadCurrentFile={handleFile}
+            externalPriorRows={changesPriorRows}
+            onRemapClick={() => setShowRemap(true)}
+            onLoadSampleChanges={handleLoadSampleChanges}
+          />
+        )}
+
+        {/* Remap panel (used by all tabs) */}
+        {showRemap && parseResult && (
+          <RemapPanel
+            headers={parseResult.headers}
+            currentMap={parseResult.columnMap}
+            onApply={handleRemap}
+            onClose={() => setShowRemap(false)}
+            lowConfidence={
+              parseResult.confidence === "low" || hasCoreMissing
+            }
+          />
+        )}
+
+        {/* Populated view — Weekly Status and Sprint Review tabs only */}
+        {hasDigest && parseResult && mode !== "changes" && (
           <div>
             {/* Top bar with file controls + group-by (only on weekly tab) */}
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
@@ -470,18 +524,6 @@ export default function DigestApp() {
                   Remap columns
                 </button>
               </div>
-            )}
-
-            {showRemap && (
-              <RemapPanel
-                headers={parseResult.headers}
-                currentMap={parseResult.columnMap}
-                onApply={handleRemap}
-                onClose={() => setShowRemap(false)}
-                lowConfidence={
-                  parseResult.confidence === "low" || hasCoreMissing
-                }
-              />
             )}
 
             {/* Tab body */}
