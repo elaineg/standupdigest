@@ -1,43 +1,32 @@
-# Round 1 — Sam (Product Manager, IN-AUDIENCE, mobile-heavy)
+# Round 1 — Sam (Product Manager)
 
-## 1. CLARITY — Yes
-The H1 "Turn your tracker export into a weekly status — in seconds" plus the
-subhead "Drop a Jira/Linear/Asana/GitHub CSV. Get a Shipped / In Progress /
-Blocked digest ready to paste into Slack" told me exactly what it does and that
-it's for me in under 10 seconds. "Load sample data" let me see the output with
-zero setup. No jargon, no confusion.
+**Name:** Sam — Product manager, mobile-heavy, medium tech, won't debug anything.
+**In-audience:** yes (compiles a weekly stakeholder status from Asana every week; wants a copy-to-Slack digest).
 
-## 2. VALUE — Yes
-TODAY I hand-build my weekly stakeholder status by reading Asana, copying titles
-into Notion, and grouping them by epic/owner — maybe 30–40 min every Friday. This
-did it in two clicks: grouped by Assignee (one tap to switch to Epic), auto
-summary line ("shipped 5, 4 in progress, 2 blocked, 1 carried over"), carry-over
-tags, and even an "Unmapped status" catch so nothing silently disappears. Copy
-Markdown / Copy plain text drop it straight into Slack. This is a real time save
-on a job I do every single week.
+**Value:** Yes
+**Clarity:** Yes
+**Advocacy:** 9
 
-## 3. ADVOCACY — 9
-I'd bring this up unprompted in our PM channel Friday. The one thing keeping it
-off a 10: I haven't yet dropped my *real* messy Asana export — sample data is
-clean, and my actual CSV has weird status names and custom columns; if "Remap
-columns" / unmapped handling holds up on the real file it's a 10. (It at least
-visibly surfaces unmapped rows, which earns trust.)
+## What I'd tell a friend
+"Drop your Asana/Jira/Linear CSV, get a Shipped / In Progress / Blocked weekly status grouped by person (or epic), and it remembers last week so next Monday you just drop the new export and it tells you what shipped, unblocked, started, and got removed — then one button copies it clean into Slack." The headline "Turn your tracker export into a weekly status — in seconds" + the Slack mention nailed it in ~5s.
 
-## 4. SHARE NOTES
-- Share link: found instantly ("Share link" top-right of the digest). Flow is a
-  two-step "Share link" -> "Create link" — clean, not confusing.
-- Privacy: BEST part. The "What gets uploaded?" panel splits UPLOADED (formatted
-  digest only) vs STAYS ON YOUR DEVICE (raw CSV, backlog, unmapped rows, column
-  mappings) and warns "Anyone with the link can view — don't create one for
-  confidential data." That's the clarity I need before sending to stakeholders.
-- Copy-link confirmation: obvious — button flips to "Link copied ✓", plus a
-  banner "You've shared a read-only copy of this digest via link." (Clipboard
-  read blocked in test env, but the button handler fired and label changed —
-  copy verified visually.)
-- Mobile shared view (375px): impressive. Color-coded Shipped/In Progress/Blocked,
-  inline owner names, carry-over tag preserved, "Read-only shared digest" label,
-  and a "Create your own digest — no signup" CTA. Stakeholders would be impressed.
+## Evidence (375px mobile throughout)
+- Cold landing obvious instantly: tabs, headline, "Load sample data". 0 console errors.
+- Sample digest groups Shipped(5)/In Progress(4)/Blocked(2)/Backlog(3) by assignee, with a Group-by: Assignee/Epic toggle. Clean carry-over + unmapped-status handling.
+- SAVE snapshot → strip shows "Saved on this device · Week of Mon 8 Jun – Sun 14 Jun".
+- ONE-DROP next week WORKS: saved snapshot, then on Weekly Status "Load different file" → week2 CSV, switched to Changes — auto-diffed with NO second upload. Diff was 100% correct: Newly Shipped(1) Build analytics dashboard, New(1) Add SSO, Unblocked(1) Fix login redirect, Newly Started(1) Design onboarding, Still Blocked(1), Carried over(8), Removed from tracker(2). Every categorization matched my edits.
+- Baseline strip: "Comparing against: Week of Mon 8 Jun – Sun 14 Jun · saved just now / Saved on this device — never uploaded" + Clear + "Make this week the new baseline". Promote works (baseline became 19 Jun).
+- Empty state honest: "Nothing to compare yet. Save this week as your baseline…" with demo + manual-fallback link.
+- COPY counts EXACTLY honest: copied plain text + Markdown both match on-screen counts; collapsed "Carried over (8)" expands to exactly 8 lines in the copy; summary line identical. Clipboard read succeeded — paste-into-Slack ready, no env block.
+- Promote → identical data shows smart "No changes detected — are these the same export?"
+
+## Defects / confusion
+1. MINOR: Right after saving the snapshot, if I open Changes while the SAME file is still loaded, it diffs the file against itself and shows phantom changes ("1 new: Audit accessibility issues" [the unmapped-status item], "12 carried over") instead of the "No changes detected — are these the same export?" message it correctly shows after promote. Self-corrects once I drop a real new file, but a PM glancing at Changes immediately after Save could briefly be misled. Inconsistent with the post-promote no-change copy.
+2. MINOR: Yellow "Matched by title (less reliable) — no ID column found" is a touch alarming for a non-debugger; an Asana export has a Task ID column I'd happily map, but I wasn't nudged to.
+
+## Why 9 not 10
+The recurring flow (save → next-week one-drop → correct diff → honest copy-to-Slack) is exactly my Monday job and works flawlessly on mobile. Holding back the 10th point only for the phantom self-diff right after saving (defect 1) — fix that consistency and this is an unprompted recommend.
 
 ```json
-{"tester": 1, "round": 1, "clarity": "Yes", "value": "Yes", "advocacy": 9, "topComplaints": ["Only validated on clean sample data — unproven against a messy real Asana export with custom status names/columns"], "priorConcernsAddressed": "n/a"}
+{"tester": 1, "round": 1, "clarity": "Yes", "value": "Yes", "advocacy": 9, "topComplaints": ["Right after Save, Changes shows a phantom self-diff ('1 new' = unmapped-status item) instead of 'No changes detected' until a new file is dropped", "'Matched by title (less reliable)' warning is mildly alarming and doesn't nudge me to map the Asana Task ID column"], "priorConcernsAddressed": "n/a"}
 ```

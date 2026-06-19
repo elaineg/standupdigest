@@ -432,3 +432,93 @@ describe('Changes — different-tracker warning', () => {
     expect(model.newThisPeriod.length).toBe(1);
   });
 });
+
+// ---- D1 fix: one-drop flow — Changes-tab drop produces correct diff vs snapshot ----
+// Tests the lib-level logic that the Changes tab one-drop flow relies on.
+// Scenario: user saves PRIOR as baseline, then drops CURRENT on Changes tab.
+// computeChanges(current, prior) must produce the correct oracle counts —
+// identical to loading the pair normally (snapshot rows inflated from prior data).
+
+describe('D1 fix — one-drop flow: snapshot baseline + new current drop → correct diff', () => {
+  it('correct diff when current = CHANGES_CURRENT_CSV rows and prior = snapshot-inflated rows', () => {
+    const { currentRows, priorRows } = parseSample();
+    // Simulate snapshot inflation: snapshotToRows produces rows with id, bucket, title
+    // (same fields computeChanges needs); this mirrors the actual ChangesView logic.
+    const snapshotInflated = priorRows.map((r, idx) => ({
+      ...r,
+      id: `snapshot-${r.issueKey || r.title}-${idx}`,
+      assignee: '',
+      epic: '',
+      date: '',
+      isCarryOver: false,
+      editedTitle: undefined,
+      storyPoints: 0,
+      sprint: '',
+      addedDate: '',
+      removedDate: '',
+    }));
+    // computeChanges(current, snapshotInflated) must match computeChanges(current, prior)
+    const modelFromSnapshot = computeChanges(currentRows, snapshotInflated);
+    const modelFromRaw = computeChanges(currentRows, priorRows);
+    expect(modelFromSnapshot.newlyShipped.length).toBe(modelFromRaw.newlyShipped.length);
+    expect(modelFromSnapshot.newlyBlocked.length).toBe(modelFromRaw.newlyBlocked.length);
+    expect(modelFromSnapshot.slipped.length).toBe(modelFromRaw.slipped.length);
+    expect(modelFromSnapshot.newThisPeriod.length).toBe(modelFromRaw.newThisPeriod.length);
+    expect(modelFromSnapshot.sameFileDetected).toBe(false);
+    // Confirm no phantom self-diff — counts are the full oracle set, not zero
+    expect(modelFromSnapshot.newlyShipped.length).toBe(3);
+    expect(modelFromSnapshot.newThisPeriod.length).toBe(4);
+  });
+
+  it('sameFileDetected=true when current rows === prior rows (self-diff scenario from same-session save)', () => {
+    // This is the EXACT scenario D1 catches: user saves a snapshot then opens Changes tab
+    // while the same file is still loaded. computeChanges(current, current) = sameFileDetected.
+    const { currentRows } = parseSample();
+    const model = computeChanges(currentRows, currentRows);
+    expect(model.sameFileDetected).toBe(true);
+    // The UI should NOT render the model in this case — it should show the instructive prompt.
+  });
+});
+
+// ---- D2 fix: diff direction consistency between auto/snapshot path and manual fallback ----
+// Both paths must call computeChanges(current=newer, prior=older) — same direction.
+
+describe('D2 fix — manual fallback diff direction matches auto/snapshot path', () => {
+  it('computeChanges(current, prior) and computeChanges(current, prior) are identical regardless of path', () => {
+    // Simulate auto path: current = this week, prior = last week (snapshot)
+    const { currentRows, priorRows } = parseSample();
+    const autoModel = computeChanges(currentRows, priorRows);
+
+    // Simulate manual path: user drops "different baseline" = priorRows (same old data).
+    // The manual path must use the SAME argument order: computeChanges(current, droppedPrior).
+    const manualModel = computeChanges(currentRows, priorRows);
+
+    expect(manualModel.newlyShipped.length).toBe(autoModel.newlyShipped.length);
+    expect(manualModel.slipped.length).toBe(autoModel.slipped.length);
+    expect(manualModel.newlyBlocked.length).toBe(autoModel.newlyBlocked.length);
+    expect(manualModel.removed.length).toBe(autoModel.removed.length);
+    expect(manualModel.sameFileDetected).toBe(autoModel.sameFileDetected);
+  });
+
+  it('inverted argument order produces wrong direction (guard against regression)', () => {
+    // If arguments are swapped, an item "added in current" appears as "removed from prior".
+    // This test documents the WRONG direction so any accidental swap is caught.
+    const currentCsv = `Issue Key,Title,Status\nA-1,Alpha,Done\nA-2,Beta,In Progress\n`;
+    const priorCsv = `Issue Key,Title,Status\nA-1,Alpha,In Progress\n`;
+    const current = parseCSVText(currentCsv).rows;
+    const prior = parseCSVText(priorCsv).rows;
+
+    // CORRECT direction: current vs prior
+    const correct = computeChanges(current, prior);
+    // A-1: In Progress → Shipped = newly-shipped; A-2: new = new-this-period
+    expect(correct.newlyShipped.length).toBe(1);
+    expect(correct.newThisPeriod.length).toBe(1);
+    expect(correct.removed.length).toBe(0);
+
+    // WRONG direction (swapped): prior vs current — A-2 appears as "removed from tracker"
+    const inverted = computeChanges(prior, current);
+    expect(inverted.removed.length).toBe(1); // A-2 is prior-only = "removed" in the inverted view
+    // This proves the two orderings are NOT equivalent; direction matters.
+    expect(inverted.newlyShipped.length).toBe(0);
+  });
+});

@@ -174,7 +174,13 @@ export function detectSource(
   headers: string[]
 ): "jira" | "linear" | "asana" | "github" | "unknown" {
   const lower = headers.map((h) => h.toLowerCase());
+  // Jira: "summary" + "epic link" (full export) OR "issue key"/"key" + "summary" (minimal export)
   if (lower.includes("summary") && lower.includes("epic link")) return "jira";
+  if (
+    lower.includes("summary") &&
+    (lower.includes("issue key") || lower.includes("key"))
+  )
+    return "jira";
   if (lower.includes("title") && lower.some((h) => h === "cycle"))
     return "linear";
   if (lower.includes("name") && lower.includes("section/column"))

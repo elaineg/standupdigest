@@ -484,3 +484,23 @@ describe('detectSource – broadened GitHub detection (no date columns)', () => 
     expect(detectSource(['Title', 'State', 'Assignee', 'Cycle', 'Updated'])).toBe('linear');
   });
 });
+
+// ---- P3: detectSource – Jira minimal export without epic link ----
+
+describe('detectSource – Jira minimal export (P3 fix)', () => {
+  it('detects jira from "Issue Key" + "Summary" without "Epic Link"', () => {
+    expect(detectSource(['Issue Key', 'Summary', 'Status', 'Assignee'])).toBe('jira');
+  });
+  it('detects jira from "Key" + "Summary" (short-form Jira export)', () => {
+    expect(detectSource(['Key', 'Summary', 'Status'])).toBe('jira');
+  });
+  it('still detects jira from full export with "Summary" + "Epic Link"', () => {
+    expect(detectSource(['Issue Key', 'Summary', 'Status', 'Assignee', 'Epic Link'])).toBe('jira');
+  });
+  it('does NOT mis-detect Asana as jira (Asana uses "Name", not "Summary")', () => {
+    expect(detectSource(['Name', 'Section/Column', 'Assignee'])).toBe('asana');
+  });
+  it('does NOT mis-detect GitHub as jira (GitHub uses "Title", not "Summary")', () => {
+    expect(detectSource(['Title', 'State', 'Assignee'])).toBe('github');
+  });
+});

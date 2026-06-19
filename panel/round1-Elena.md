@@ -1,34 +1,49 @@
-# Round 1 — Elena (Engineering manager, 8 reports, IN-AUDIENCE)
+# Round 1 — Elena (Engineering manager, 8 reports)
 
-Cold open on laptop, share link judged at 375px (my VP opens it on their phone).
+- Name: Elena
+- In-audience: yes (recurring weekly report compiler, lives in Linear)
+- Value: **Yes**
+- Clarity: **Yes**
+- Advocacy: **9**
 
-## 1. CLARITY — Yes
-Got it in ~5s. H1 "Turn your tracker export into a weekly status — in seconds." + "Shipped /
-In Progress / Blocked digest ready to paste into Slack" + "Jira · Linear · Asana · GitHub."
-Linear is named, "no upload, no signup" is right there. No setup, no jargon. I'd stay.
+## Cold open (~5s)
+H1 "Turn your tracker export into a weekly status — in seconds." + subline naming
+Jira/Linear/Asana/GitHub + "Shipped / In Progress / Blocked digest ready to paste into
+Slack" + "no upload, no signup." I understood it instantly and it speaks Linear. There is a
+"Load sample data" button so I'm not forced to find a CSV first. No setup. Passes my 30s bar.
 
-## 2. VALUE — Yes
-Today my Friday update = eyeballing Linear and hand-typing a per-person summary into a Google
-Doc (~25 min). The sample digest is exactly my artifact: grouped by assignee,
-Shipped/In-Progress/Blocked, one-line summary, carry-over flagged yellow, AND an "Unmapped
-Status" bucket so a custom Linear status doesn't silently vanish. That detail earns my trust.
+## Flow tested (real Linear-style CSV, 8 rows wk1, modified wk2 + 1 new task)
+1. Dropped week1 → digest grouped by assignee: SHIPPED 3 / IN PROGRESS 3 / BLOCKED 2,
+   "0 carried over". Counts match my CSV exactly. Statuses recognized ✓.
+2. "Save this week's snapshot" — one click. Strip then reads "Saved on this device · All dates".
+3. **One-drop diff WORKS.** Realistic next-week flow = open app fresh (snapshot persists in
+   localStorage), Changes tab shows a single drop zone, drop week2 — NO second upload needed.
+   Auto-diff: Newly Shipped 2 (SSO, billing), Newly Blocked 1 (latency), New 1 (CI pipeline),
+   Unblocked 2 (auth, dashboard), Carried over 3. Every category correct vs my CSVs.
+4. Baseline strip: "Comparing against: All dates · saved just now" + "Saved on this device —
+   never uploaded" + Clear + "Make this week the new baseline" (promote). All present & honest.
+5. Empty state honest: "Nothing to compare yet. Save this week as your baseline — next week,
+   just drop your new export." Reachable on fresh load / before any snapshot.
+6. Copy verified: clipboard text EXACTLY matches on-screen counts and every line item
+   (header "2 shipped, 1 newly blocked, 2 unblocked, 1 new, 3 carried over" + all rows).
+7. Mobile 375px: full flow works — save btn visible, drop zone present, one-drop diff renders,
+   color-coded, NO horizontal overflow, tabs usable. I'd genuinely do this on my phone.
 
-## 3. ADVOCACY — 8
-I'd bring this up to other EMs. Holding it back from 9: I only proved it on the SAMPLE.
-"Remap columns" is where these tools usually choke, and a fumbled first real Linear export
-would blow my 30-second budget. One clean run on my own messy CSV and this is a 9.
+## Defects / friction
+- **Confusing self-compare (minor but real):** If you SAVE the snapshot and immediately click
+  Changes in the SAME session (week1 still loaded), it auto-compares week1 vs week1 and shows
+  "No changes detected — are these the same export?" with NO visible drop zone to add the new
+  week. I briefly thought it was broken. The drop zone only reappears on a fresh load. The
+  same-session path should still offer a "drop this week's export" target instead of silently
+  comparing the snapshot to itself.
+- "Matched by title (less reliable) — no ID column found" warning appeared on my CSV. A real
+  Linear export includes an ID column so this may not fire for me, but the wording is slightly
+  alarming for a first-timer.
+- No defects in counts, honesty, baseline labeling, empty state, or mobile.
 
-## SHARE NOTES
-- Found + worked fast: "Share link" obvious; link created in ~3s → /s/<id>.
-- Privacy note EXCELLENT: two-column "UPLOADED (formatted digest only) vs STAYS ON YOUR DEVICE
-  (raw CSV, backlog, mappings)" + red "Anyone with the link can view this; don't use for
-  confidential data." That's exactly the clarity I need before sending my VP a link.
-- Copy confirmation visible: button flips "Copy link" → "Link copied ✓". (Clipboard READ
-  blocked in my headless test env — copy verified visually, not a regression.)
-- Mobile shared view at 375px: glanceable, NOT a mess. Single column, color-coded sections,
-  assignee on every item, carry-over inline, no horizontal scroll. "Read-only shared digest"
-  header sets expectations; "Create your own digest" footer is a smart hook. VP reads it in one glance.
+Why 9 not 10: the same-session "no drop zone / self-compare" moment is the one spot that
+could make a busy manager think it's broken before the (excellent) real flow kicks in.
 
 ```json
-{"tester": 1, "round": 1, "clarity": "Yes", "value": "Yes", "advocacy": 8, "topComplaints": ["Only proved it on the sample — haven't survived my own messy Linear export (custom statuses, sub-issues); Remap columns is the usual breakpoint", "Pitch says 'paste into Slack' but there's no one-tap Slack share — I'd still copy markdown or paste a link manually"], "priorConcernsAddressed": "n/a"}
+{"tester": 1, "round": 1, "clarity": "Yes", "value": "Yes", "advocacy": 9, "topComplaints": ["Same-session save→Changes self-compares snapshot vs itself and hides the drop zone, looks broken", "'Matched by title (less reliable)' warning is alarming wording for first use"], "priorConcernsAddressed": "n/a"}
 ```

@@ -1,41 +1,24 @@
-# Round 1 — Marcus (Frontend eng, 2yr; NON-FIT — reports up, not down)
+# Round 1 — Marcus (Frontend engineer, 2yr) — in-audience: NO
 
-## 1. CLARITY — Yes
-H1 "Turn your tracker export into a weekly status — in seconds" + subline "Drop a Jira, Linear,
-Asana, or GitHub CSV. Get a Shipped / In Progress / Blocked digest ready to paste into Slack"
-told me exactly what it is in <10s. Drop zone, "Load sample data", and the "Jira · Linear ·
-Asana · GitHub Issues" line removed all doubt. One-sentence explainable. No console errors.
+**Value: No** — I report up to my lead, I don't aggregate a team's weekly status, so no recurring need of my own. BUT I'd run a GitHub-issues export through it once to see, and I'd drop the link in team Slack for our EM — it's genuinely the kind of "this is free and needs no signup?!" tool I share.
 
-## 2. VALUE — No (for ME specifically)
-The tool is good, but I report UP to my lead, not down — I don't assemble a weekly team status.
-Today I just paste a couple PR links into Slack myself; this solves a job I don't have. For an
-EM/team lead it'd genuinely beat hand-typing a Friday update. As an early adopter I'd try it on a
-GitHub issues export out of curiosity, but no recurring need of my own.
+**Clarity: Yes** — Cold open is obvious in <5s: "Turn your tracker export into a weekly status — in seconds. Drop a Jira/Linear/Asana/GitHub CSV. Get a Shipped/In Progress/Blocked digest ready to paste into Slack." Tabs (Weekly Status / Sprint Review / Changes) + "Your file never leaves your browser — no upload, no signup" nail the who/what.
 
-## 3. ADVOCACY — 6
-I'd share it in our Slack once because it's slick and free with no signup — not unprompted or
-repeatedly, since it's not my workflow. SINGLE thing holding the number down (beyond fit): the
-floating "Copy Markdown / Copy plain text" bar is fixed/sticky and OVERLAPS the digest content —
-it sits on top of "Build analytics dashboard" mid-list in the main view. A frontend dev notices
-that instantly; reads as unfinished. Fix the z-index/scroll-margin and this is an 8.
+**Advocacy: 8/10** — Craft is high, the feature works, math is honest. Not a 9 only because (a) it's not my job so I won't bring it up unprompted, and (b) the one real flow friction below.
 
-## 4. SHARE NOTES
-- Sharing FOUND + WORKED end-to-end: "Share link" → privacy disclosure → "Create link" produced
-  /s/RXqy7rSmC2AsarD2VjEqF5xI, which rendered a real read-only page.
-- Privacy story HONEST + clear, not contradictory: two columns "UPLOADED (only the formatted
-  digest…)" vs "STAYS ON YOUR DEVICE — NEVER UPLOADED (raw CSV, backlog/todo, unmapped rows,
-  column mappings)" + red "Anyone with the link can view this digest. Don't create one for
-  confidential data." After creating, copy correctly switches to "Your CSV stays in your browser.
-  You've shared a read-only copy…". Best privacy explanation I've seen in this category.
-- Copy-link confirmation VISIBLE: button flips to "Link copied ✓". (Clipboard read blocked in
-  test env — copy verified visually, not a regression.)
-- Mobile shared view at 375px: polished, NO horizontal overflow (scrollWidth==clientWidth),
-  color headers + carry-over tag preserved, read-only eye icon, clean "Create your own digest"
-  CTA + "Made free with StandupDigest — no signup" footer. No janky CSS on the shared page.
-- Only janky CSS anywhere = the overlapping fixed Copy bar in the main editor view.
+## Evidence
+- Uploaded GitHub-style CSV (title/state/assignee/labels). Digest: SHIPPED 2 / IN PROGRESS 4 / BLOCKED 1, summary line matched. "All statuses recognized ✓".
+- "Save this week's snapshot" → button flips to green pill "Saved on this device · All dates". Clear confirmation.
+- One-drop diff WORKS: with snapshot saved, loading week2 export → Changes tab auto-diffs vs snapshot, NO second upload. "Since last week: 2 shipped, 1 new, 1 still blocked, 4 carried over." Diff math verified correct against my two CSVs.
+- Baseline strip: "Comparing against: All dates · saved just now / Saved on this device — never uploaded" + Clear + "Make this week the new baseline" (promote). Promote works → baseline updates, then correctly shows "No changes detected".
+- Empty state (fresh device): "Nothing to compare yet. Save this week as your baseline…" — clear.
+- COPY honest: clipboard Markdown == on-screen counts exactly (2/1/1/4, all items present). Copy verified; clipboard read worked in test env.
+- Nice honest touch: amber "Matched by title (less reliable) — no ID column found" warning.
+
+## Defects
+- **P2 / flow friction:** the promise is "just drop your new export" but on the Changes tab after a snapshot exists, the drop zone DISAPPEARS — there's no file input/drop target there at all. The real path is "go back to Weekly Status, load the new file, then Changes auto-diffs." That's a 2-step flow, not the one-drop the empty state implies. A drop-here affordance on the Changes tab itself (it's there pre-snapshot, vanishes post-snapshot) would close the gap.
+- **No CSS/craft defects.** No console/page errors. No horizontal overflow at 375 (scrollWidth==clientWidth at land/digest/changes). Mobile baseline strip + buttons + tabs wrap cleanly, no jank.
 
 ```json
-{"tester": 1, "round": 1, "clarity": "Yes", "value": "No", "advocacy": 6,
- "topComplaints": ["Fixed Copy Markdown/plain-text bar overlaps digest content (z-index/scroll-margin)", "Not my workflow — I report up, not down; no recurring need"],
- "priorConcernsAddressed": "n/a"}
+{"tester": 0, "round": 1, "clarity": "Yes", "value": "No", "advocacy": 8, "topComplaints": ["'Just drop your new export' implies dropping on the Changes tab, but the drop zone vanishes after a snapshot is saved — the actual one-drop path is via Weekly Status (2 steps)"], "priorConcernsAddressed": "n/a"}
 ```

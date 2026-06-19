@@ -19,6 +19,7 @@ import { SprintReviewView } from "@/components/SprintReviewView";
 import { ChangesView } from "@/components/ChangesView";
 import { RemapPanel } from "@/components/RemapPanel";
 import { useShareLinkState } from "@/components/ShareControl";
+import type { DigestSnapshotEntry } from "@/lib/snapshotStorage";
 
 const LS_MAP_KEY = (source: string) => `standupdigest-colmap-${source}`;
 const LS_GROUP_KEY = "standupdigest-groupmode";
@@ -103,6 +104,8 @@ export default function DigestApp() {
   const [mode, setMode] = useState<AppMode>("weekly");
   // Changes tab: prior-period rows (set by "Load sample data" on the Changes tab)
   const [changesPriorRows, setChangesPriorRows] = useState<DigestRow[] | null>(null);
+  // Snapshot: track when a snapshot is saved so ChangesView can re-read it
+  const [savedSnapshot, setSavedSnapshot] = useState<DigestSnapshotEntry | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -507,6 +510,8 @@ export default function DigestApp() {
               onRemapClick={() => setShowRemap(true)}
               onLoadSampleChanges={handleLoadSampleChanges}
               onShareLinkCreated={markSharedLink}
+              source={parseResult?.source}
+              recentlySavedSnapshot={savedSnapshot}
             />
           </>
         )}
@@ -623,6 +628,8 @@ export default function DigestApp() {
                 suppressSuccess={hasCoreMissing}
                 onShareLinkCreated={markSharedLink}
                 autoAppliedCount={autoAppliedCount}
+                source={parseResult?.source}
+                onSnapshotSaved={setSavedSnapshot}
               />
             ) : (
               <SprintReviewView

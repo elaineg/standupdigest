@@ -1144,6 +1144,13 @@ ENG-15,Audit accessibility issues,Needs Triage Review,Bob,UX,2026-06-13
 
 test('SC22: TITLE-MATCH FALLBACK — no id column shows "Matched by title (less reliable)" note', async ({ page }) => {
   await page.goto(BASE + '/');
+  // Clear any saved snapshots so we're in first-ever empty state
+  await page.evaluate(() => {
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const k = localStorage.key(i);
+      if (k?.startsWith('standupdigest-snapshot-v1-')) localStorage.removeItem(k!);
+    }
+  });
   await page.locator('[data-testid="tab-changes"]').click();
 
   // Current CSV with no id column
@@ -1163,8 +1170,11 @@ Task Gamma,Done,Carol,2026-06-06
     buffer: Buffer.from(currentCsv),
   });
 
-  // Wait for current to be loaded (prior dropzone is still shown)
-  await expect(page.locator('text=Compare to last week')).toBeVisible({ timeout: 5000 });
+  // After uploading current file, we're in first-ever-empty state.
+  // Expand the "Compare to a different export instead" disclosure to reveal the prior dropzone.
+  const disclosureBtn = page.getByRole('button', { name: /Compare to a different export instead/i });
+  await expect(disclosureBtn).toBeVisible({ timeout: 5000 });
+  await disclosureBtn.click();
 
   const priorInput = page.locator('input[aria-label="Upload prior week CSV file"]');
   await priorInput.setInputFiles({

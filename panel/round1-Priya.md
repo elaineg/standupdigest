@@ -1,42 +1,29 @@
-# Round 1 — Priya (Senior backend SWE, desktop, keyboard-first, skeptical, NON-FIT)
+# Round 1 — Priya (Senior backend engineer)
 
-## 1. CLARITY — Yes
-H1 "Turn your tracker export into a weekly status — in seconds" + subline naming
-Jira/Linear/Asana/GitHub CSV and "Shipped / In Progress / Blocked ... paste into Slack"
-told me what it does and who it's for in under 5s. "Load sample data" let me see real
-output with one click, no hunting for an export. Tabs (Weekly Status / Sprint Review /
-Changes) self-explanatory. The "never leaves your browser — no upload, no signup" line is
-the only reason a tool-skeptic like me didn't bounce.
+in-audience: no (I write my own standup bullets in Slack; I don't compile a team-wide weekly status from a tracker export)
 
-## 2. VALUE — No
-Not for me. I'm an IC backend engineer; I type my own two standup bullets straight into
-Slack. I never compile a team-wide weekly status from a tracker export — that's an EM/TL
-job. Well-built and it WOULD save a manager real time vs hand-collating Jira into a wiki,
-but it solves no recurring job I own. If a manager shared a digest link I'd read it; I'd
-never generate one. Me-fit problem, not a quality problem.
+## Value: No (for me) — but the feature is genuinely well-built
+I don't have this problem. I never export Jira/Linear to assemble a team status; that's an EM/lead chore. So I'd never open this twice. Honest non-fit No. If I *were* an EM, the "remember last week → drop one CSV → instant week-over-week diff" loop is the right shape and would beat my hypothetical "diff two spreadsheets by hand."
 
-## 3. ADVOCACY — 5
-I'd mention it to my EM ("stop hand-writing the Friday status"), but to exactly one person,
-roughly once — not the unprompted repeated recommendation a 9–10 needs. Biggest thing
-holding it down: zero personal recurrence; it's a tool for the person who OWNS team status,
-not the IC who reports into it. Honest 5, not a polite 7.
+## Clarity: Yes
+Cold open is unambiguous in <5s: "Turn your tracker export into a weekly status — in seconds. Drop a Jira, Linear, Asana, or GitHub CSV." Tabs (Weekly Status / Sprint Review / Changes) are self-explaining. "Your file never leaves your browser — no upload, no signup" is exactly the line that earns my trust.
 
-## 4. SHARE NOTES — works end-to-end, privacy honest, mobile good, copy confirmed
-- Found it easily: "Share link" → explainer panel → "Create link". POST /api/digest-share
-  returns http://localhost:3010/s/<id>. (Two-step: first click opens the explainer, second
-  creates — minor friction, but the explainer earns it.)
-- I inspected the network tab (I always do). The POST body contains ONLY the formatted
-  digest: summary line + Shipped/In Progress/Blocked titles with assignees. The "What gets
-  uploaded?" panel says raw CSV, Backlog/Todo, unmapped rows, and column mappings STAY on
-  device — the actual payload confirms that exactly. Honest, not contradictory. The "Don't
-  create one for confidential data" warning is the right candor; I respect it.
-- Page load + sample render hit ZERO network — genuinely client-side until you opt into
-  sharing.
-- Copy link: label flipped to "Copied" and the clipboard actually held the /s/ URL
-  (verified by reading it back). Confirmation visible.
-- Mobile shared view (375px): clean, color-coded, read-only banner, correctly OMITS
-  Backlog + Unmapped, "Made free — no signup" footer with CTA. Looks right.
+## Advocacy: 5/10
+Solid execution, but I'm not its user and have no EM friend top-of-mind to push it to. Not a defect score — it's a "good tool, wrong audience for me" score. The honest caveat ("Matched by title (less reliable) — no ID column found") actually *raised* my trust; most tools would silently mis-diff.
+
+## Evidence
+- NETWORK TAB (the thing I came to check): ZERO POST/PUT/PATCH across the entire flow — sample load, week1 upload, save snapshot, reload, week2 drop, copy. Truly client-side. Baseline strip "Saved on this device — never uploaded" is TRUE.
+- localStorage holds `standupdigest-snapshot-v1-*` — snapshot persists across reload, no server.
+- One-drop diff WORKS: saved week1 snapshot, reloaded (new session), opened Changes → empty state "Nothing to compare yet", dropped ONE week2 CSV → auto-diffed against snapshot, no second upload. Exactly as promised.
+- COUNTS HONEST: on-screen summary "2 shipped, 1 started, 1 unblocked, 1 new, 1 still blocked, 9 carried over" == section headers (2/1/1/1/1/9) == copied plain-text clipboard (verified byte-for-byte: 2 newly-shipped bullets, etc.). Diff itself was logically correct (In Progress→Done = shipped; Blocked→In Progress = unblocked; new row = new).
+- Empty state, baseline strip with Clear + "Make this week the new baseline" (promote), and "Compare to a different export" (pick-different) all present and working.
+- MOBILE 375px: clean, no clipping/overlap; full diff + copy buttons usable.
+
+## Defects
+- MINOR (a11y): "Copy Markdown" / "Copy plain text" are `<span>` elements, not real `<button>`s (no button role). Mouse-click works; keyboard/screen-reader users may not reach them. Same for behavior — fired fine for me.
+- MINOR (UX, the one that briefly confused me): right after saving a snapshot, if the just-loaded export is still in memory the Changes tab shows "No changes detected — are these the same export?" comparing the snapshot to itself. Correct, but for a beat I thought the diff was broken. A "this is your baseline; drop next week's export to see changes" framing in that exact state would be clearer.
+- None blocking. Network/privacy claim verified true; counts verified honest.
 
 ```json
-{"tester": 0, "round": 1, "clarity": "Yes", "value": "No", "advocacy": 5, "topComplaints": ["Zero personal recurrence — it's an EM/TL tool; I'm an IC who writes my own Slack bullets", "Share is two-step (explainer, then Create link) — slightly more friction than a one-click copy"], "priorConcernsAddressed": "n/a"}
+{"tester": "Priya", "round": 1, "clarity": "Yes", "value": "No", "advocacy": 5, "topComplaints": ["Not my use case — I write my own Slack bullets, not a team status; would never open it twice", "Copy buttons are spans not buttons (a11y)", "Snapshot-vs-itself shows 'No changes detected' which read as broken for a beat"], "priorConcernsAddressed": "n/a"}
 ```

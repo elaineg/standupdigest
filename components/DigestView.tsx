@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import type { DigestRow, Bucket, GroupMode } from "@/lib/csvParser";
 import { buildMarkdown, buildPlainText, type DigestModel } from "@/lib/digestSerializer";
 import { ShareControl } from "@/components/ShareControl";
 import { buildWeeklySnapshot } from "@/lib/snapshotSerializer";
+import { saveSnapshot, type DigestSnapshotEntry } from "@/lib/snapshotStorage";
 
 export interface WeekOption {
   key: string; // "YYYY-Www" or "all"
@@ -24,6 +25,9 @@ interface DigestViewProps {
   onShareLinkCreated?: () => void; // Called when a share link is minted
   // C(ii): count of statuses auto-applied from saved rules (for "remembered" indicator)
   autoAppliedCount?: number;
+  // Snapshot: source key + callback when snapshot is saved
+  source?: string;
+  onSnapshotSaved?: (entry: DigestSnapshotEntry) => void;
 }
 
 const BUCKET_MOVE_OPTIONS: Bucket[] = [
@@ -372,43 +376,30 @@ function GroupedSection({
 }
 
 // ---- Copy buttons (Fix 2: shared model, Fix 3: opaque bg, A: non-overlapping static footer) ----
+// P1-FIX: state lifted into DigestView (passed as props) to survive any potential remount;
+// useRef-based setter avoids stale closures; data-testid added for reliable e2e targeting.
 
-function CopyButtons({ model }: { model: DigestModel }) {
-  const [mdState, setMdState] = useState<"idle" | "copied">("idle");
-  const [ptState, setPtState] = useState<"idle" | "copied">("idle");
-
-  const copyText = useCallback(
-    async (
-      text: string,
-      setState: React.Dispatch<React.SetStateAction<"idle" | "copied">>
-    ) => {
-      setState("copied");
-      try {
-        await navigator.clipboard.writeText(text);
-      } catch {
-        const ta = document.createElement("textarea");
-        ta.value = text;
-        ta.style.position = "fixed";
-        ta.style.top = "-9999px";
-        ta.style.left = "-9999px";
-        ta.style.opacity = "0";
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand("copy");
-        document.body.removeChild(ta);
-      }
-      setTimeout(() => setState("idle"), 2000);
-    },
-    []
-  );
-
+function CopyButtons({
+  model,
+  mdState,
+  ptState,
+  onCopyMd,
+  onCopyPt,
+}: {
+  model: DigestModel;
+  mdState: "idle" | "copied";
+  ptState: "idle" | "copied";
+  onCopyMd: () => void;
+  onCopyPt: () => void;
+}) {
   return (
     // A-fix: static footer (not sticky) — sits below all content, never overlaps rows.
     // bg-white solid opaque; border-t for visual separation.
     <div className="bg-white border-t border-gray-200 px-4 py-3 flex gap-3 rounded-b-2xl">
       <button
+        data-testid="copy-md-btn"
         aria-label="Copy as Markdown"
-        onClick={() => copyText(buildMarkdown(model), setMdState)}
+        onClick={onCopyMd}
         className={`flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
           mdState === "copied"
             ? "bg-green-600 text-white"
@@ -420,8 +411,9 @@ function CopyButtons({ model }: { model: DigestModel }) {
         </span>
       </button>
       <button
+        data-testid="copy-pt-btn"
         aria-label="Copy as plain text"
-        onClick={() => copyText(buildPlainText(model), setPtState)}
+        onClick={onCopyPt}
         className={`flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
           ptState === "copied"
             ? "bg-green-600 text-white"
@@ -450,9 +442,44 @@ export function DigestView({
   suppressSuccess = false,
   onShareLinkCreated,
   autoAppliedCount = 0,
+  source,
+  onSnapshotSaved,
 }: DigestViewProps) {
   // Fix 5: editable prose
   const [editedProse, setEditedProse] = useState<string | null>(null);
+  // Snapshot save state: "idle" | "saved"
+  const [snapshotState, setSnapshotState] = useState<"idle" | "saved">("idle");
+  const [snapshotLabel, setSnapshotLabel] = useState<string>("");
+  // P1-FIX: copy state lifted to DigestView level — survives any re-render of CopyButtons
+  const [mdCopyState, setMdCopyState] = useState<"idle" | "copied">("idle");
+  const [ptCopyState, setPtCopyState] = useState<"idle" | "copied">("idle");
+  // useRef to hold model for copy handlers — avoids stale closure when model changes between renders
+  const modelRef = useRef<DigestModel | null>(null);
+
+  const handleSaveSnapshot = useCallback(() => {
+    if (!source) return;
+    const currentWeekOption = availableWeeks.find((w) => w.key === weekFilter);
+    const label = currentWeekOption?.label ?? "All dates";
+    // Snapshot captures ALL digest rows (unfiltered by week, to preserve full set for diffs).
+    // saveSnapshot excludes only Unmapped rows; Backlog rows ARE included for Newly Started detection.
+    saveSnapshot(source, label, rows);
+    setSnapshotLabel(label);
+    setSnapshotState("saved");
+    // Notify parent so ChangesView can read the new snapshot immediately (without page reload)
+    if (onSnapshotSaved) {
+      const entry = {
+        source,
+        periodLabel: label,
+        savedAt: Date.now(),
+        items: rows
+          .filter((r) => r.bucket !== "Unmapped")
+          .map((r) => ({ id: r.issueKey || "", bucket: r.bucket, title: r.title })),
+      };
+      onSnapshotSaved(entry);
+    }
+    // Reset label after 4s so next save works
+    setTimeout(() => setSnapshotState("idle"), 4000);
+  }, [source, availableWeeks, weekFilter, rows, onSnapshotSaved]);
 
   // Fix 4: filter rows by selected week
   const visibleRows = filterRowsByWeek(rows, weekFilter);
@@ -484,6 +511,44 @@ export function DigestView({
     unmapped,
     groupMode,
   };
+
+  // P1-FIX: keep modelRef current so copy handlers always read the latest model
+  modelRef.current = model;
+
+  // P1-FIX: stable copy handlers — state lives at DigestView level, reads model via ref
+  const handleCopyMd = useCallback(async () => {
+    setMdCopyState("copied");
+    const text = buildMarkdown(modelRef.current!);
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.cssText = "position:fixed;top:-9999px;left:-9999px;opacity:0";
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+    }
+    setTimeout(() => setMdCopyState("idle"), 2000);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleCopyPt = useCallback(async () => {
+    setPtCopyState("copied");
+    const text = buildPlainText(modelRef.current!);
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.cssText = "position:fixed;top:-9999px;left:-9999px;opacity:0";
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+    }
+    setTimeout(() => setPtCopyState("idle"), 2000);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Snapshot builder for share — captures current formatted digest
   const getShareSnapshot = useCallback(
@@ -520,7 +585,7 @@ export function DigestView({
           </select>
         </div>
 
-        {/* Fix 1: persistent Remap columns button + Share link */}
+        {/* Fix 1: persistent Remap columns button + Snapshot + Share link */}
         <div className="flex items-center gap-3 flex-wrap">
           <div className="flex flex-col items-end gap-0.5">
             <button
@@ -535,6 +600,27 @@ export function DigestView({
               Saved on this device — next week just drop your new export.
             </span>
           </div>
+
+          {/* Save this week's snapshot — first-class outlined pill control */}
+          {source && (
+            <button
+              onClick={handleSaveSnapshot}
+              aria-label="Save this week's snapshot"
+              data-testid="save-snapshot-btn"
+              className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-semibold transition-colors ${
+                snapshotState === "saved"
+                  ? "border-green-500 bg-green-50 text-green-700"
+                  : "border-blue-300 bg-white text-blue-700 hover:bg-blue-50"
+              }`}
+            >
+              <span aria-live="polite" aria-atomic="true">
+                {snapshotState === "saved"
+                  ? `Saved on this device · ${snapshotLabel}`
+                  : "Save this week's snapshot"}
+              </span>
+            </button>
+          )}
+
           <ShareControl
             getSnapshot={getShareSnapshot}
             onLinkCreated={onShareLinkCreated}
@@ -627,7 +713,13 @@ export function DigestView({
       </div>
 
       {/* Fix 2: copy from shared model; Fix 3: opaque sticky bar */}
-      <CopyButtons model={model} />
+      <CopyButtons
+        model={model}
+        mdState={mdCopyState}
+        ptState={ptCopyState}
+        onCopyMd={handleCopyMd}
+        onCopyPt={handleCopyPt}
+      />
     </div>
   );
 }

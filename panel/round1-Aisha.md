@@ -1,39 +1,27 @@
-# Round 1 — Aisha (Product designer, NON-FIT, judges craft hard) — SHARE focus
+# Round 1 — Aisha (Product designer)
 
-## 1. CLARITY — Yes
-Cold, in ~15s: "Drop a Jira/Linear/Asana/GitHub CSV, get a Shipped / In Progress / Blocked
-digest you paste into Slack." Headline + subhead name the inputs AND the output format, and
-"Your file never leaves your browser — no upload, no signup" sets trust immediately. Three
-tabs (Weekly Status / Sprint Review / Changes) are legible. Nothing made me squint.
+**In-audience:** no (judge craft primarily; not my own recurring tracker-digest need)
+**Value:** No (for me) — would recommend to a PM/EM friend who runs standup, not use weekly myself
+**Clarity:** Yes
+**Advocacy:** 7/10
 
-## 2. VALUE — Marginal (honest NON-FIT)
-Today the team update gets hand-assembled in Slack/Notion by whoever owns it — not me. As a
-designer I contribute lines, I don't own a recurring tracker digest, so I wouldn't open this
-weekly. For the owner, the categorization + assignee grouping + "carry-over" tag + unmapped-
-status catch-all is real time saved. Real value, just not for my role.
+## Evidence
+- Cold open clear in <5s: H1 "Turn your tracker export into a weekly status — in seconds." + "Drop a Jira, Linear, Asana, or GitHub CSV... ready to paste into Slack." Tone is tight and concrete. "Your file never leaves your browser — no upload, no signup" is exactly the reassurance I'd want, placed well.
+- Digest craft is genuinely good: clear status hierarchy, the amber `carry-over` pill, the honest `UNMAPPED STATUS (1)` with a "Move to…" remap. This feels considered.
+- Save→Changes→one-drop WORKS in the canonical path: loaded sample → "Save this week's snapshot" → Changes auto-diffed the loaded export against the snapshot with NO second upload. Baseline strip reads "Comparing against: Week of Mon 8 Jun – Sun 14 Jun · saved just now / Saved on this device — never uploaded" + Clear / "Make this week the new baseline" — excellent, trustworthy copy.
+- Canonical diff was CORRECT: In Progress→Done = NEWLY SHIPPED; Blocked→In Progress = UNBLOCKED; To Do→In Progress = NEWLY STARTED; brand-new row = NEW THIS PERIOD. The labels are well-named.
+- Empty state is the standout: "Nothing to compare yet." + plain-language loop explanation + demo button + escape hatch. Considered, not a dead end.
+- Counts honest: copied plain text summary line + every section count == on-screen (1 newly blocked, 1 slipped, 1 reopened, 1 still blocked, 11 carried over, 1 removed). (Clipboard read worked in-test.)
+- Mobile 375px: tabs wrap to 2 lines cleanly, baseline strip + buttons stack, warning wraps, no overflow. Good mobile craft.
 
-## 3. ADVOCACY — 7 (reported honestly; a 7 = falls short of "bring it up unprompted")
-Biggest thing holding it down: the in-app digest chrome is slightly clumsy where everything
-else is considered. "Share link" is a tiny blue text link at top-right, equal visual weight to
-"Remap columns" — the marquee output action is under-emphasized; and the "Copy Markdown / Copy
-plain text" bar floats/overlaps mid-digest (reads like a sticky-position artifact). Polish
-those two and I'd go 8–9. I won't inflate to recommend-unprompted for a tool outside my workflow.
+## Defects
+1. **Diff direction INVERTS on "Compare to a different export instead" path.** Dropping next-week's CSV there treats the DROP as old and the SNAPSHOT as new: a row I added ("Add dark mode") showed under "REMOVED FROM TRACKER"; Blocked→InProgress showed as "NEWLY BLOCKED." Backwards and misleading — and the baseline strip silently degrades to "Comparing against: loaded export," dropping the "never uploaded" reassurance. (P1)
+2. **Phantom assignee.** "Audit accessibility issues" has NO assignee in the source, but the auto-diff labeled it "(Bob)". Wrong attribution in a status doc people paste to a team. (P2)
+3. Two valid ways to feed "this week" (Load different file vs the alt-export drawer) behave differently and one is wrong — the dual path is a craft smell; should be one obvious flow.
 
-## SHARE NOTES
-- Affordance: DISCOVERABLE but UNDER-WEIGHTED. "Share link" small blue text, visually identical
-  to "Remap columns" — not distinct enough for the most shareable action. It IS clearly separate
-  from the Copy buttons (those live at card bottom), so no confusion, just under-emphasis.
-- Disclosure copy: EXCELLENT tone. "What gets uploaded?" inset panel, two-column UPLOADED vs
-  "STAYS ON YOUR DEVICE — NEVER UPLOADED", then red "Anyone with the link can view this digest.
-  Don't create one for confidential data." Honest, specific, no legalese. Best-crafted moment.
-- Shared page desktop: clean, on-brand — eye-icon "Read-only shared digest" badge, color-coded
-  sections, tasteful "Made free with StandupDigest — no signup / Create your own digest" footer.
-  Backlog + unmapped rows correctly OMITTED, matching the disclosure promise — trust kept.
-- Shared page 375px: genuinely good — no overflow, badge wraps gracefully, footer stacks clean.
-- Copy-link confirmation: CONSIDERED. Two-step (Create link → readonly URL field + green
-  "Link copied ✓" button), and the subhead updates to "You've shared a read-only copy via link."
-  Clipboard verified: real short URL /s/QRZj… landed. Confirmation visible and reassuring.
+## Why 7 not higher
+Core loop, copy tone, empty state, and mobile are all genuinely considered — I'd advocate at 8–9 if the alt-export path weren't inverted and the assignee weren't fabricated. A status tool that ever shows a backwards diff or a wrong name loses the trust this category lives on. Fix those two and I'd bring it up to PM friends unprompted.
 
 ```json
-{"tester": 1, "round": 1, "clarity": "Yes", "value": "Marginal", "advocacy": 7, "topComplaints": ["'Share link' entry point under-weighted — tiny text link at equal weight to 'Remap columns', not distinct enough for the marquee share action", "Copy Markdown/plain bar floats and overlaps mid-digest like a sticky-position artifact"], "priorConcernsAddressed": "n/a"}
+{"tester": 0, "round": 1, "clarity": "Yes", "value": "No", "advocacy": 7, "topComplaints": ["'Compare to a different export' path inverts diff direction (added row shows as Removed; unblocked shows as Newly Blocked) and drops the 'never uploaded' line", "Phantom assignee '(Bob)' on an unassigned item in the diff", "Two ways to load 'this week' behave inconsistently — one produces a wrong diff"], "priorConcernsAddressed": "n/a"}
 ```

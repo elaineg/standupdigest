@@ -1,34 +1,52 @@
-# StandupDigest — Round 1 — Dana (Demand-gen marketer, IN-AUDIENCE)
+# Round 1 — Dana (Demand-gen marketer)
 
-**1. CLARITY: Yes.** One scroll told me everything: "Turn your tracker export into a weekly
-status — in seconds. Drop a Jira, Linear, Asana, or GitHub CSV. Get a Shipped / In Progress /
-Blocked digest ready to paste into Slack." Asana is named, the output is named, and "Your file
-never leaves your browser — no upload, no signup" killed my usual hesitation. I'd explain it in
-one sentence to my team channel.
+- Name: Dana
+- In-audience: yes (recurring weekly status compiler; runs a small team, exports from a tracker)
+- Value: **Yes**
+- Clarity: **Yes**
+- Advocacy: **8/10**
 
-**2. VALUE: Yes.** Today I hand-write my weekly stakeholder update by skimming an Asana export
-into a Notion doc — 20+ min of copy/paste and categorizing. The sample digest auto-grouped into
-Shipped/In Progress/Blocked by assignee, gave a ready summary line ("shipped 5, 4 in progress,
-2 blocked, 1 carried over"), flagged carry-overs, and caught an UNMAPPED status with a one-click
-"Move to..." fixer. Copy Markdown / Copy plain text = paste straight into Slack/Notion. Real
-time save, not a re-entry tax.
+## Clarity (Yes)
+Cold load nailed it in one scroll: H1 "Turn your tracker export into a weekly status — in
+seconds", subline names **Asana** explicitly, "Shipped / In Progress / Blocked digest ready
+to paste into Slack", plus "Your file never leaves your browser — no upload, no signup."
+I could explain it to my team channel in one line. No confusion above the fold.
 
-**3. ADVOCACY: 8.** I'd screenshot this to my team channel today. Holding it back from 9: I
-haven't proven it on MY messy real Asana export cold. "Remap columns" exists (reassuring), but
-the sample is idealized — I can't be sure my custom statuses map without fiddling. That's the
-gap between "looks great" and "I rely on it weekly."
+## Value (Yes)
+Today I hand-compile this from an Asana board into Notion/Slack every Friday — ~20 min of
+copy-paste. This produced a clean Shipped/In-Progress/Blocked digest from my CSV instantly,
+correctly mapping Asana statuses (Done→Shipped, Todo→Backlog). The week-over-week feature is
+the real win: I saved this week's snapshot, next week dropped the new export in Weekly Status,
+and the **Changes** tab auto-diffed with NO second upload. That's a genuine recurring-habit
+hook — one drop, not a two-CSV hand-export.
 
-**4. SHARE NOTES — all passed.**
-- Found + worked: "Share link" -> "What gets uploaded?" panel -> "Create link" made a `/s/...` URL.
-- Mobile shared view at 375px: clean, color-coded Shipped/In Progress/Blocked, assignees +
-  carry-over flag preserved, labeled "Read-only shared digest," "Create your own digest" CTA at
-  bottom. Stakeholders could read it on a phone instantly. Glanceable: yes.
-- Privacy note: clear + honest — UPLOADED (formatted digest only) vs STAYS ON YOUR DEVICE (raw
-  CSV, backlog, mappings) columns + red warning "Anyone with the link can view this digest.
-  Don't create one for confidential data." Exactly what I need before sharing externally.
-- Copy-link confirmation: visible — button flips to "Link copied ✓" and clipboard verified to
-  hold the URL.
+## Evidence
+- save→Changes→one-drop: **WORKS**. Saved snapshot, dropped week2 in Weekly Status, Changes
+  auto-diffed week2-vs-saved-week1. Diff was correct: NEWLY SHIPPED(2) Launch Q3 + LinkedIn
+  copy (In Progress→Done), NEW(1) Plan Q4 ABM, UNBLOCKED(1) Fix HubSpot (Blocked→In Progress),
+  NEWLY STARTED(1) webinar nurture (Todo→In Progress), CARRIED OVER(2) GA4 + UTM.
+- Baseline strip: names snapshot "Comparing against: Week of Mon 15 Jun – Sun 21 Jun · saved
+  just now" + "Saved on this device — never uploaded" + Clear + "Make this week the new
+  baseline" (promote-to-baseline). All present and correct.
+- Empty state: confirmed — "Nothing to compare yet. Save this week as your baseline — next
+  week, just drop your new export and we'll show what changed." Honest, with sample/demo option.
+- Counts honest: on-screen "2 shipped, 1 started, 1 unblocked, 1 new, 2 carried over" EXACTLY
+  matched Copy Markdown output (headline + every section count). Verified copy on desktop AND
+  mobile.
+- Mobile 375px: full flow works (save → drop → auto-diff → copy). Zero horizontal overflow,
+  tabs wrap cleanly, sections stack, copy buttons reachable.
+
+## Defects / friction
+- **Minor (not blocker):** "Matched by title (less reliable) — no ID column found" warning on
+  my Asana export. Honest, but mildly unnerving — if two tasks share a name the diff could
+  mismatch. Could nudge me to include a Task ID column. Costs ~1 pt of trust.
+- **UX nit:** the one-drop model is slightly non-obvious. The Changes tab itself has no
+  dropzone; the "current" week comes from whatever's loaded in Weekly Status. I initially
+  expected to drop the new CSV directly on the Changes tab. It works once you get it, but a
+  one-liner on Changes ("drop next week's export in Weekly Status — we'll diff it here") would
+  remove a beat of confusion.
+- No crashes, no console errors, counts honest throughout.
 
 ```json
-{"tester": 1, "round": 1, "clarity": "Yes", "value": "Yes", "advocacy": 8, "topComplaints": ["Can't trust it on my real messy Asana export cold — sample is idealized; unsure custom statuses map without fiddling Remap columns", "Shared link is read-only with no revoke/expiry control once 'anyone with the link can view'"], "priorConcernsAddressed": "n/a"}
+{"tester": 1, "round": 1, "clarity": "Yes", "value": "Yes", "advocacy": 8, "topComplaints": ["no-ID 'matched by title (less reliable)' warning dents diff trust", "one-drop model non-obvious: Changes tab has no dropzone, current week comes from Weekly Status"], "priorConcernsAddressed": "n/a"}
 ```
